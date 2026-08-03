@@ -107,7 +107,6 @@ export default function InvestmentDashboard() {
       quantidade: parseNumBR(form.quantidade) || 0,
       rentabilidade: parseNumBR(form.rentabilidade) || 0,
       valorReinvestido: parseNumBR(form.valorReinvestido) || 0,
-      reservaOportunidade: parseNumBR(form.reservaOportunidade) || 0,
       estaReinvestido: form.estaReinvestido === "Sim",
     };
 
@@ -138,13 +137,12 @@ export default function InvestmentDashboard() {
 
   const totals = useMemo(() => {
     const totalInvestido = entries.reduce((s, e) => s + e.valorInvestido, 0);
-    const totalReserva = entries.reduce((s, e) => s + e.reservaOportunidade, 0);
     const rentMedia =
       entries.length > 0
         ? entries.reduce((s, e) => s + e.rentabilidade, 0) / entries.length
         : 0;
     const ativos = new Set(entries.map((e) => e.nivel)).size;
-    return { totalInvestido, totalReserva, rentMedia, ativos };
+    return { totalInvestido, rentMedia, ativos };
   }, [entries]);
 
   const porTipo = useMemo(() => {
@@ -178,10 +176,12 @@ export default function InvestmentDashboard() {
 
   const porMes = useMemo(() => {
     const map = {};
-    entries.forEach((e) => {
-      const key = e.data.slice(0, 7);
-      map[key] = (map[key] || 0) + e.valorInvestido;
-    });
+    entries
+      .filter((e) => e.valorInvestido > 0)
+      .forEach((e) => {
+        const key = e.data.slice(0, 7);
+        map[key] = (map[key] || 0) + e.valorInvestido;
+      });
     return Object.entries(map)
       .map(([key, value]) => ({ name: monthLabel(key), value, key }))
       .sort((a, b) => a.key.localeCompare(b.key));
@@ -228,7 +228,7 @@ export default function InvestmentDashboard() {
         }
 
         @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-        .reveal { animation: fadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .reveal { animation: fadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
         .reveal-1 { animation-delay: 0.02s; }
         .reveal-2 { animation-delay: 0.1s; }
         .reveal-3 { animation-delay: 0.18s; }

@@ -4,6 +4,7 @@ import { PALETTE } from "../constants.js";
 import { formatBRL, formatDateBR } from "../utils.js";
 import { EntryForm } from "./EntryForm.jsx";
 import { ColumnFilterDropdown } from "./ColumnFilterDropdown.jsx";
+import { ConfirmDialog } from "./ConfirmDialog.jsx";
 
 const iconBtnStyle = {
   background: "transparent",
@@ -24,7 +25,8 @@ const COLUNAS_EXTRATO = [
   { key: "valorReinvestido", label: "Valor Investido/Reinvestido", align: "right", format: (v) => formatBRL(v) },
 ];
 
-const GRID_COLUNAS = "85px 110px 85px 100px 75px 105px 115px 175px 55px";
+const GRID_COLUNAS =
+  "minmax(85px, 0.85fr) minmax(110px, 1.1fr) minmax(85px, 0.85fr) minmax(100px, 1fr) minmax(75px, 0.75fr) minmax(105px, 1.05fr) minmax(115px, 1.15fr) minmax(175px, 1.75fr) 55px";
 
 export function LancamentosTab({
   sortedEntries,
@@ -41,6 +43,12 @@ export function LancamentosTab({
   ativosList,
 }) {
   const [filters, setFilters] = useState({});
+  const [pendingDelete, setPendingDelete] = useState(null);
+
+  function confirmDelete() {
+    if (pendingDelete) handleDelete(pendingDelete.id);
+    setPendingDelete(null);
+  }
 
   const opcoesPorColuna = useMemo(() => {
     const map = {};
@@ -254,7 +262,7 @@ export function LancamentosTab({
                   <button onClick={() => openEditForm(e)} style={iconBtnStyle} aria-label="Editar">
                     <Pencil size={14} color={PALETTE.textMuted} />
                   </button>
-                  <button onClick={() => handleDelete(e.id)} style={iconBtnStyle} aria-label="Excluir">
+                  <button onClick={() => setPendingDelete(e)} style={iconBtnStyle} aria-label="Excluir">
                     <Trash2 size={14} color={PALETTE.crimson} />
                   </button>
                 </div>
@@ -263,6 +271,17 @@ export function LancamentosTab({
           </div>
         )}
       </div>
+
+      {pendingDelete && (
+        <ConfirmDialog
+          title="Excluir lançamento"
+          message={`Deseja realmente excluir o lançamento de ${pendingDelete.nivel} em ${formatDateBR(pendingDelete.data)}?`}
+          confirmLabel="Sim, excluir"
+          cancelLabel="Não"
+          onConfirm={confirmDelete}
+          onCancel={() => setPendingDelete(null)}
+        />
+      )}
     </div>
   );
 }

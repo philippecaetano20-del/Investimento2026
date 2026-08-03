@@ -35,7 +35,6 @@ export function emptyForm() {
     valorPago: "",
     data: new Date().toISOString().slice(0, 10),
     valorReinvestido: "",
-    reservaOportunidade: "",
     estaReinvestido: "Não",
   };
 }

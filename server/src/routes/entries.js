@@ -15,7 +15,6 @@ const COLUMNS = [
   "data",
   "rentabilidade",
   "valorReinvestido",
-  "reservaOportunidade",
   "estaReinvestido",
 ];
 
@@ -43,7 +42,6 @@ function toEntryRow(body, id) {
     data: String(body.data || ""),
     rentabilidade: num(body.rentabilidade),
     valorReinvestido: calculado,
-    reservaOportunidade: num(body.reservaOportunidade),
     estaReinvestido: estaReinvestido ? 1 : 0,
   };
 }
@@ -129,7 +127,6 @@ router.post("/import-2026", (req, res) => {
         data: n.data,
         rentabilidade: n.rentabilidade === "" ? 0 : num(n.rentabilidade),
         valorReinvestido,
-        reservaOportunidade: num(n.reservaOportunidade),
         estaReinvestido: valorInvestido === 0 && valorReinvestido > 0 ? 1 : 0,
       };
       const existente = encontraIgual(dados);

@@ -20,7 +20,6 @@ db.exec(`
     data TEXT NOT NULL,
     rentabilidade REAL NOT NULL DEFAULT 0,
     valorReinvestido REAL NOT NULL DEFAULT 0,
-    reservaOportunidade REAL NOT NULL DEFAULT 0,
     estaReinvestido INTEGER NOT NULL DEFAULT 0
   );
 
@@ -33,6 +32,9 @@ const entryColumns = db.prepare("PRAGMA table_info(entries)").all().map((c) => c
 if (!entryColumns.includes("estaReinvestido")) {
   db.exec("ALTER TABLE entries ADD COLUMN estaReinvestido INTEGER NOT NULL DEFAULT 0;");
   db.exec("UPDATE entries SET estaReinvestido = 1 WHERE valorInvestido = 0 AND valorReinvestido > 0;");
+}
+if (entryColumns.includes("reservaOportunidade")) {
+  db.exec("ALTER TABLE entries DROP COLUMN reservaOportunidade;");
 }
 
 const ativosCount = db.prepare("SELECT COUNT(*) AS c FROM ativos").get().c;
