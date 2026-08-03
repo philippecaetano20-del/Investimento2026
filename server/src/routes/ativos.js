@@ -1,46 +1,67 @@
 import { Router } from "express";
-import { db, withTransaction } from "../db.js";
+import { db } from "../db.js";
 
 const router = Router();
 
-router.get("/", (req, res) => {
-  const rows = db.prepare("SELECT nome FROM ativos ORDER BY nome COLLATE NOCASE").all();
-  res.json(rows.map((r) => r.nome));
-});
+function ah(fn) {
+  return (req, res, next) => fn(req, res, next).catch(next);
+}
 
-router.post("/", (req, res) => {
-  const nome = String(req.body?.nome || "").trim();
-  if (!nome) return res.status(400).json({ error: "Informe o nome do ativo." });
-  const dup = db.prepare("SELECT nome FROM ativos WHERE nome = ? COLLATE NOCASE").get(nome);
-  if (dup) return res.status(409).json({ error: "Esse ativo já está cadastrado." });
-  db.prepare("INSERT INTO ativos (nome) VALUES (?)").run(nome);
-  res.status(201).json({ nome });
-});
+router.get(
+  "/",
+  ah(async (req, res) => {
+    const result = await db.execute("SELECT nome FROM ativos ORDER BY nome COLLATE NOCASE");
+    res.json(result.rows.map((r) => r.nome));
+  })
+);
 
-router.put("/:nome", (req, res) => {
-  const nomeAtual = req.params.nome;
-  const novoNome = String(req.body?.nome || "").trim();
-  if (!novoNome) return res.status(400).json({ error: "Informe o novo nome do ativo." });
+router.post(
+  "/",
+  ah(async (req, res) => {
+    const nome = String(req.body?.nome || "").trim();
+    if (!nome) return res.status(400).json({ error: "Informe o nome do ativo." });
+    const dup = await db.execute({ sql: "SELECT nome FROM ativos WHERE nome = ? COLLATE NOCASE", args: [nome] });
+    if (dup.rows.length > 0) return res.status(409).json({ error: "Esse ativo já está cadastrado." });
+    await db.execute({ sql: "INSERT INTO ativos (nome) VALUES (?)", args: [nome] });
+    res.status(201).json({ nome });
+  })
+);
 
-  const existente = db.prepare("SELECT nome FROM ativos WHERE nome = ?").get(nomeAtual);
-  if (!existente) return res.status(404).json({ error: "Ativo não encontrado." });
+router.put(
+  "/:nome",
+  ah(async (req, res) => {
+    const nomeAtual = req.params.nome;
+    const novoNome = String(req.body?.nome || "").trim();
+    if (!novoNome) return res.status(400).json({ error: "Informe o novo nome do ativo." });
 
-  if (novoNome.toLowerCase() !== nomeAtual.toLowerCase()) {
-    const dup = db.prepare("SELECT nome FROM ativos WHERE nome = ? COLLATE NOCASE").get(novoNome);
-    if (dup) return res.status(409).json({ error: "Já existe um ativo com esse nome." });
-  }
+    const existente = await db.execute({ sql: "SELECT nome FROM ativos WHERE nome = ?", args: [nomeAtual] });
+    if (existente.rows.length === 0) return res.status(404).json({ error: "Ativo não encontrado." });
 
-  withTransaction(() => {
-    db.prepare("UPDATE ativos SET nome = ? WHERE nome = ?").run(novoNome, nomeAtual);
-    db.prepare("UPDATE entries SET nivel = ? WHERE nivel = ?").run(novoNome, nomeAtual);
-  });
+    if (novoNome.toLowerCase() !== nomeAtual.toLowerCase()) {
+      const dup = await db.execute({ sql: "SELECT nome FROM ativos WHERE nome = ? COLLATE NOCASE", args: [novoNome] });
+      if (dup.rows.length > 0) return res.status(409).json({ error: "Já existe um ativo com esse nome." });
+    }
 
-  res.json({ nome: novoNome });
-});
+    const tx = await db.transaction("write");
+    try {
+      await tx.execute({ sql: "UPDATE ativos SET nome = ? WHERE nome = ?", args: [novoNome, nomeAtual] });
+      await tx.execute({ sql: "UPDATE entries SET nivel = ? WHERE nivel = ?", args: [novoNome, nomeAtual] });
+      await tx.commit();
+    } catch (e) {
+      await tx.rollback();
+      throw e;
+    }
 
-router.delete("/:nome", (req, res) => {
-  db.prepare("DELETE FROM ativos WHERE nome = ?").run(req.params.nome);
-  res.status(204).end();
-});
+    res.json({ nome: novoNome });
+  })
+);
+
+router.delete(
+  "/:nome",
+  ah(async (req, res) => {
+    await db.execute({ sql: "DELETE FROM ativos WHERE nome = ?", args: [req.params.nome] });
+    res.status(204).end();
+  })
+);
 
 export default router;
