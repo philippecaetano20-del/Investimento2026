@@ -4,12 +4,12 @@ import { PALETTE } from "../constants.js";
 import { formatBRL } from "../utils.js";
 import { renderPie2D } from "./charts.jsx";
 
-export function MetaAnualCard({ investido2026, meta }) {
-  const restante = meta - investido2026;
-  const pct = Math.max(0, Math.min(100, (investido2026 / meta) * 100));
+export function MetaAnualCard({ ano, investidoAno, meta }) {
+  const restante = meta - investidoAno;
+  const pct = Math.max(0, Math.min(100, (investidoAno / meta) * 100));
   const atingida = restante <= 0;
   const pieData = [
-    { name: "Investido", value: Math.min(investido2026, meta) },
+    { name: "Investido", value: Math.min(investidoAno, meta) },
     { name: "Ainda resta", value: Math.max(0, restante) },
   ];
   const pieColors = [PALETTE.emerald, PALETTE.crimson];
@@ -37,7 +37,7 @@ export function MetaAnualCard({ investido2026, meta }) {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 24, marginBottom: 14 }}>
           <div>
             <div style={{ fontSize: 10.5, color: PALETTE.textMuted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
-              Meta para 2026
+              Meta para {ano}
             </div>
             <div className="mono" style={{ fontSize: 18, fontWeight: 600, color: PALETTE.textPrimary }}>
               {formatBRL(meta)}
@@ -48,7 +48,7 @@ export function MetaAnualCard({ investido2026, meta }) {
               Já investido
             </div>
             <div className="mono" style={{ fontSize: 18, fontWeight: 600, color: PALETTE.emerald }}>
-              {formatBRL(investido2026)}
+              {formatBRL(investidoAno)}
             </div>
           </div>
           <div>

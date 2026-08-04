@@ -20,4 +20,4 @@ export const HISTORICO_ANOS_ANTERIORES = {
   "2025": 52089.94,
 };
 
-export const META_2026 = 24000;
+export const META_ANUAL = 24000;

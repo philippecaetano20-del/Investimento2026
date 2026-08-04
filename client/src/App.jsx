@@ -3,10 +3,9 @@ import { Wallet } from "lucide-react";
 import { PALETTE } from "./constants.js";
 import { formatBRL, monthLabel, emptyForm, parseNumBR } from "./utils.js";
 import { api } from "./api.js";
-import { HISTORICO_ANOS_ANTERIORES, META_2026 } from "./constants.js";
+import { HISTORICO_ANOS_ANTERIORES, META_ANUAL } from "./constants.js";
 import { ChartCard, PieChartCard } from "./components/charts.jsx";
 import { MetaAnualCard } from "./components/MetaAnualCard.jsx";
-import { SummaryCard } from "./components/SummaryCard.jsx";
 import { TabButton } from "./components/TabButton.jsx";
 import { LancamentosTab } from "./components/LancamentosTab.jsx";
 import { AssetsManager } from "./components/AssetsManager.jsx";
@@ -187,6 +186,9 @@ export default function InvestmentDashboard() {
       .sort((a, b) => a.key.localeCompare(b.key));
   }, [entries]);
 
+  const anoAtual = new Date().getFullYear();
+  const investidoAnoAtual = porAno.find((d) => d.name === String(anoAtual))?.value || 0;
+
   const sortedEntries = useMemo(
     () => [...entries].sort((a, b) => (a.data < b.data ? 1 : -1)),
     [entries]
@@ -294,8 +296,9 @@ export default function InvestmentDashboard() {
           <div style={{ textAlign: "right" }}>
             <div
               className="mono"
-              style={{ fontSize: 11, color: PALETTE.textMuted, marginBottom: 4, letterSpacing: "0.1em" }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6, fontSize: 11, color: PALETTE.textMuted, marginBottom: 4, letterSpacing: "0.1em" }}
             >
+              <Wallet size={13} color={PALETTE.gold} />
               TOTAL INVESTIDO
             </div>
             <div className="mono" style={{ fontSize: 34, fontWeight: 600, color: PALETTE.textPrimary }}>
@@ -341,22 +344,6 @@ export default function InvestmentDashboard() {
           />
         ) : (
           <>
-            {/* Summary card */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                gap: 14,
-                marginBottom: 28,
-              }}
-            >
-              <SummaryCard
-                icon={<Wallet size={16} color={PALETTE.gold} />}
-                label="Total investido"
-                value={formatBRL(totals.totalInvestido)}
-              />
-            </div>
-
             {/* Charts */}
             <div
               style={{
@@ -373,7 +360,7 @@ export default function InvestmentDashboard() {
               <ChartCard title="Por ano" data={porAno} />
             </div>
 
-            <MetaAnualCard investido2026={porAno.find((d) => d.name === "2026")?.value || 0} meta={META_2026} />
+            <MetaAnualCard ano={anoAtual} investidoAno={investidoAnoAtual} meta={META_ANUAL} />
           </>
         )}
         </div>
