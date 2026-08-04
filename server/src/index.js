@@ -3,6 +3,7 @@ import cors from "cors";
 import { initDb } from "./db.js";
 import entriesRouter from "./routes/entries.js";
 import ativosRouter from "./routes/ativos.js";
+import marketRouter from "./routes/market.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use("/api/entries", entriesRouter);
 app.use("/api/ativos", ativosRouter);
+app.use("/api/market", marketRouter);
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 

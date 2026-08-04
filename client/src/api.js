@@ -24,4 +24,7 @@ export const api = {
   renameAtivo: (nomeAtual, novoNome) =>
     request(`/ativos/${encodeURIComponent(nomeAtual)}`, { method: "PUT", body: JSON.stringify({ nome: novoNome }) }),
   removeAtivo: (nome) => request(`/ativos/${encodeURIComponent(nome)}`, { method: "DELETE" }),
+
+  searchMarket: (q) => request(`/market/search?q=${encodeURIComponent(q)}`),
+  getQuote: (ticker, range = "3mo") => request(`/market/quote/${encodeURIComponent(ticker)}?range=${encodeURIComponent(range)}`),
 };
