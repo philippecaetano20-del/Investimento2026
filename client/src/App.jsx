@@ -15,12 +15,14 @@ export default function InvestmentDashboard() {
   const [ativosList, setAtivosList] = useState([]);
   const [activeTab, setActiveTab] = useState("painel");
   const [loading, setLoading] = useState(true);
+  const [slowLoading, setSlowLoading] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState(emptyForm());
   const [error, setError] = useState("");
   const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
+    const slowTimer = setTimeout(() => setSlowLoading(true), 4000);
     (async () => {
       try {
         const [entriesData, ativosData] = await Promise.all([api.listEntries(), api.listAtivos()]);
@@ -29,9 +31,11 @@ export default function InvestmentDashboard() {
       } catch (e) {
         setSaveError("Não foi possível carregar os dados do servidor.");
       } finally {
+        clearTimeout(slowTimer);
         setLoading(false);
       }
     })();
+    return () => clearTimeout(slowTimer);
   }, []);
 
   async function addAtivo(nome) {
@@ -323,7 +327,13 @@ export default function InvestmentDashboard() {
         <div className="reveal reveal-3">
         {loading ? (
           <div style={{ color: PALETTE.textMuted, padding: 40, textAlign: "center" }}>
-            Carregando dados...
+            <div>Carregando dados...</div>
+            {slowLoading && (
+              <div style={{ fontSize: 12.5, marginTop: 10, color: PALETTE.textMuted, maxWidth: 380, marginLeft: "auto", marginRight: "auto" }}>
+                O servidor gratuito "dorme" após um tempo sem uso e pode levar até 50 segundos para acordar na
+                primeira visita. Só aguardar, já está carregando.
+              </div>
+            )}
           </div>
         ) : activeTab === "ativos" ? (
           <AssetsManager ativosList={ativosList} onAdd={addAtivo} onRename={renameAtivo} onRemove={removeAtivo} />
