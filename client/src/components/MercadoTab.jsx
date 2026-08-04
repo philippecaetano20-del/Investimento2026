@@ -23,6 +23,32 @@ export function MercadoTab({ ativosList }) {
   const [error, setError] = useState("");
   const debounceRef = useRef(null);
 
+  const [watchlist, setWatchlist] = useState([]);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
+
+  useEffect(() => {
+    if (ativosList.length === 0) {
+      setWatchlist([]);
+      return;
+    }
+    let cancelled = false;
+    setWatchlistLoading(true);
+    api
+      .getWatchlist(ativosList)
+      .then((data) => {
+        if (!cancelled) setWatchlist(data.quotes || []);
+      })
+      .catch(() => {
+        if (!cancelled) setWatchlist([]);
+      })
+      .finally(() => {
+        if (!cancelled) setWatchlistLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [ativosList]);
+
   useEffect(() => {
     if (!query.trim()) {
       setSuggestions([]);
@@ -77,7 +103,7 @@ export function MercadoTab({ ativosList }) {
         Mercado
       </div>
 
-      <div style={{ position: "relative", marginBottom: 16, maxWidth: 420 }}>
+      <div style={{ position: "relative", marginBottom: 20, maxWidth: 420 }}>
         <div style={{ position: "relative" }}>
           <Search
             size={15}
@@ -145,29 +171,26 @@ export function MercadoTab({ ativosList }) {
         )}
       </div>
 
-      {ativosList.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
-          {ativosList.map((a) => (
-            <button
-              key={a}
-              onClick={() => buscarTicker(a)}
-              style={{
-                background: ticker === a ? PALETTE.gold : PALETTE.surfaceAlt,
-                color: ticker === a ? "#1A1406" : PALETTE.textMuted,
-                border: `1px solid ${ticker === a ? PALETTE.gold : PALETTE.line}`,
-                borderRadius: 999,
-                padding: "5px 12px",
-                fontSize: 12,
-                fontWeight: 600,
-                fontFamily: "'IBM Plex Mono', monospace",
-                cursor: "pointer",
-              }}
-            >
-              {a}
-            </button>
+      {watchlistLoading ? (
+        <div style={{ color: PALETTE.textMuted, padding: 24, textAlign: "center", fontSize: 13 }}>
+          Carregando cotações dos seus ativos...
+        </div>
+      ) : watchlist.length > 0 ? (
+        <div
+          className="card-surface"
+          style={{ background: PALETTE.surface, border: `1px solid ${PALETTE.line}`, borderRadius: 10, marginBottom: 24, overflow: "hidden" }}
+        >
+          {watchlist.map((q, i) => (
+            <WatchlistRow
+              key={q.symbol}
+              quote={q}
+              selected={ticker === q.symbol}
+              onClick={() => buscarTicker(q.symbol)}
+              isLast={i === watchlist.length - 1}
+            />
           ))}
         </div>
-      )}
+      ) : null}
 
       {error && <div style={{ color: PALETTE.crimson, fontSize: 13, marginBottom: 16 }}>{error}</div>}
 
@@ -287,11 +310,94 @@ export function MercadoTab({ ativosList }) {
         </div>
       )}
 
-      {!loading && !quote && !error && (
+      {!loading && !quote && !error && !watchlistLoading && watchlist.length === 0 && (
         <div style={{ color: PALETTE.textMuted, padding: 40, textAlign: "center", fontSize: 13 }}>
           Busque uma ação ou FII acima para ver a cotação e o histórico de preços.
         </div>
       )}
+    </div>
+  );
+}
+
+function WatchlistRow({ quote, selected, onClick, isLast }) {
+  const positivo = (quote.regularMarketChangePercent || 0) >= 0;
+  const cor = positivo ? PALETTE.emerald : PALETTE.crimson;
+  const sparkline = (quote.historicalDataPrice || []).map((p, i) => ({ i, close: p.close }));
+
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 80px 110px",
+        alignItems: "center",
+        gap: 12,
+        padding: "12px 16px",
+        borderBottom: isLast ? "none" : `1px dashed ${PALETTE.line}`,
+        background: selected ? PALETTE.surfaceAlt : "transparent",
+        cursor: "pointer",
+        transition: "background 0.15s ease",
+      }}
+      onMouseEnter={(e) => {
+        if (!selected) e.currentTarget.style.background = PALETTE.surfaceAlt;
+      }}
+      onMouseLeave={(e) => {
+        if (!selected) e.currentTarget.style.background = "transparent";
+      }}
+    >
+      <div style={{ minWidth: 0 }}>
+        <div className="mono" style={{ fontWeight: 700, fontSize: 13.5, color: PALETTE.textPrimary }}>
+          {quote.symbol}
+        </div>
+        <div style={{ fontSize: 11.5, color: PALETTE.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {quote.longName || quote.shortName}
+        </div>
+      </div>
+
+      <div style={{ width: 80, height: 32 }}>
+        {sparkline.length > 1 && (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={sparkline} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
+              <defs>
+                <linearGradient id={`spark-${quote.symbol}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={cor} stopOpacity={0.4} />
+                  <stop offset="100%" stopColor={cor} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Area
+                type="monotone"
+                dataKey="close"
+                stroke={cor}
+                strokeWidth={1.5}
+                fill={`url(#spark-${quote.symbol})`}
+                isAnimationActive={false}
+                dot={false}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      <div style={{ textAlign: "right" }}>
+        <div className="mono" style={{ fontSize: 13, fontWeight: 600, color: PALETTE.textPrimary, marginBottom: 4 }}>
+          {formatBRL(quote.regularMarketPrice)}
+        </div>
+        <span
+          className="mono"
+          style={{
+            display: "inline-block",
+            fontSize: 11,
+            fontWeight: 700,
+            color: "#0E1522",
+            background: cor,
+            borderRadius: 5,
+            padding: "1px 6px",
+          }}
+        >
+          {positivo ? "+" : ""}
+          {(quote.regularMarketChangePercent || 0).toFixed(2)}%
+        </span>
+      </div>
     </div>
   );
 }

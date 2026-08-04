@@ -12,6 +12,16 @@ function withToken(params) {
   return params;
 }
 
+async function fetchQuote(ticker, { range = "3mo", interval = "1d" } = {}) {
+  const params = withToken(new URLSearchParams({ range, interval }));
+  const r = await fetch(`${BRAPI_BASE}/quote/${encodeURIComponent(ticker)}?${params.toString()}`);
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.message || "Não foi possível obter a cotação.");
+  const quote = data.results?.[0];
+  if (!quote) throw new Error("Ativo não encontrado.");
+  return quote;
+}
+
 router.get(
   "/search",
   ah(async (req, res) => {
@@ -32,16 +42,29 @@ router.get(
     const ticker = String(req.params.ticker || "").trim().toUpperCase();
     if (!ticker) return res.status(400).json({ error: "Informe o ticker." });
 
-    const range = String(req.query.range || "3mo");
-    const interval = String(req.query.interval || "1d");
-    const params = withToken(new URLSearchParams({ range, interval }));
-    const r = await fetch(`${BRAPI_BASE}/quote/${encodeURIComponent(ticker)}?${params.toString()}`);
-    const data = await r.json();
-    if (!r.ok) return res.status(r.status).json({ error: data.message || "Não foi possível obter a cotação." });
+    try {
+      const quote = await fetchQuote(ticker, { range: req.query.range, interval: req.query.interval });
+      res.json(quote);
+    } catch (e) {
+      res.status(404).json({ error: e.message });
+    }
+  })
+);
 
-    const quote = data.results?.[0];
-    if (!quote) return res.status(404).json({ error: "Ativo não encontrado." });
-    res.json(quote);
+router.get(
+  "/watchlist",
+  ah(async (req, res) => {
+    const tickers = String(req.query.tickers || "")
+      .split(",")
+      .map((t) => t.trim().toUpperCase())
+      .filter(Boolean);
+    if (tickers.length === 0) return res.json({ quotes: [] });
+
+    const settled = await Promise.allSettled(
+      tickers.map((ticker) => fetchQuote(ticker, { range: "5d", interval: "1d" }))
+    );
+    const quotes = settled.filter((r) => r.status === "fulfilled").map((r) => r.value);
+    res.json({ quotes });
   })
 );
 
