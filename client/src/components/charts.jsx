@@ -46,21 +46,22 @@ export function Bar3DLabel(colors) {
     const boxHeight = 22;
     const w = width * 0.62;
     const depth = Math.min(16, width * 0.3);
-    const cx = x + (width - w - depth) / 2 + w / 2 + depth / 2;
-    const bx = cx - boxWidth / 2;
-    const by = y - depth - boxHeight - 12;
+    const cx = Math.round(x + (width - w - depth) / 2 + w / 2 + depth / 2);
+    const bx = Math.round(cx - boxWidth / 2);
+    const by = Math.round(y - depth - boxHeight - 12);
     const color = colors[index % colors.length];
     return (
       <g>
-        <rect x={bx} y={by} width={boxWidth} height={boxHeight} rx={4} fill="#F7F5EF" stroke={color} strokeWidth={1.4} />
+        <rect x={bx} y={by} width={boxWidth} height={boxHeight} rx={4} fill="#F7F5EF" stroke={color} strokeWidth={1.4} shapeRendering="geometricPrecision" />
         <text
           x={cx}
-          y={by + boxHeight / 2 + 4}
+          y={by + Math.round(boxHeight / 2) + 4}
           textAnchor="middle"
-          fontSize={11}
+          fontSize={12}
           fontFamily="'IBM Plex Mono', monospace"
           fontWeight={700}
           fill="#1A2333"
+          style={{ textRendering: "optimizeLegibility" }}
         >
           {text}
         </text>
