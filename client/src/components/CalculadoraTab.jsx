@@ -6,6 +6,7 @@ import { api } from "../api.js";
 
 const LS_ACOES = "calc_teto_acoes";
 const LS_FIIS = "calc_teto_fiis";
+const LS_GORDON = "calc_teto_fiis_gordon";
 
 function carregar(key) {
   try {
@@ -103,6 +104,21 @@ function margemBadge(margem) {
 }
 
 export function CalculadoraTab() {
+  const [ranking, setRanking] = useState(null);
+  const [tesouro, setTesouro] = useState(null);
+
+  useEffect(() => {
+    api
+      .getFiiRanking()
+      .then((data) => {
+        const map = new Map();
+        (data.items || []).forEach((it) => map.set(it.ticker, it));
+        setRanking(map);
+      })
+      .catch(() => setRanking(new Map()));
+    api.getTesouro().then(setTesouro).catch(() => setTesouro(null));
+  }, []);
+
   return (
     <div>
       <div className="display" style={{ fontSize: 18, fontWeight: 500, marginBottom: 4 }}>
@@ -114,7 +130,8 @@ export function CalculadoraTab() {
       </div>
 
       <CalculadoraAcoes />
-      <CalculadoraFiis />
+      <CalculadoraFiis ranking={ranking} />
+      <CalculadoraFiisGordon ranking={ranking} tesouro={tesouro} />
     </div>
   );
 }
@@ -287,27 +304,14 @@ function CalculadoraAcoes() {
   );
 }
 
-function CalculadoraFiis() {
+function CalculadoraFiis({ ranking }) {
   const [rows, setRows] = useState(() => carregar(LS_FIIS));
   const [ticker, setTicker] = useState("");
-  const [loadingTicker, setLoadingTicker] = useState("");
   const [error, setError] = useState("");
-  const [ranking, setRanking] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => salvar(LS_FIIS, rows), [rows]);
-
-  useEffect(() => {
-    api
-      .getFiiRanking()
-      .then((data) => {
-        const map = new Map();
-        (data.items || []).forEach((it) => map.set(it.ticker, it));
-        setRanking(map);
-      })
-      .catch(() => setRanking(new Map()));
-  }, []);
 
   useEffect(() => {
     if (!ranking || !ticker.trim()) {
@@ -469,6 +473,225 @@ function CalculadoraFiis() {
                   </td>
                   <td style={tdStyle("right", { background: "rgba(212,169,79,0.08)" })} className="mono">
                     {r.precoIdeal != null ? formatBRL(r.precoIdeal) : "—"}
+                  </td>
+                  <td style={tdStyle("right")}>{margemBadge(r.margem)}</td>
+                  <td style={tdStyle("center")}>
+                    <button onClick={() => remover(r.ticker)} style={{ background: "transparent", border: "none", cursor: "pointer", padding: 4 }} aria-label="Remover">
+                      <Trash2 size={14} color={PALETTE.crimson} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function refBenchmark(tipoFundo, tesouro) {
+  if (!tesouro) return null;
+  return tipoFundo === "Papel" ? tesouro.prefixado : tesouro.ipca;
+}
+
+function CalculadoraFiisGordon({ ranking, tesouro }) {
+  const [rows, setRows] = useState(() => carregar(LS_GORDON));
+  const [ticker, setTicker] = useState("");
+  const [error, setError] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  useEffect(() => salvar(LS_GORDON, rows), [rows]);
+
+  useEffect(() => {
+    if (!ranking || !ticker.trim()) {
+      setSuggestions([]);
+      return;
+    }
+    const q = ticker.trim().toUpperCase();
+    setSuggestions([...ranking.keys()].filter((t) => t.includes(q)).slice(0, 8));
+  }, [ticker, ranking]);
+
+  function adicionar(tickerAlvo) {
+    const clean = String(tickerAlvo || ticker).trim().toUpperCase();
+    if (!clean) return;
+    setShowSuggestions(false);
+    setError("");
+    if (!ranking) return;
+    const item = ranking.get(clean);
+    if (!item) {
+      setError(`${clean} não encontrado na base de FIIs.`);
+      return;
+    }
+    const dividendoAnual = item.dividendYield != null ? Number(((item.cotacao * item.dividendYield) / 100).toFixed(2)) : 0;
+    const novaLinha = {
+      ticker: item.ticker,
+      tipo: item.tipo,
+      preco: item.cotacao || 0,
+      dividendoAnual,
+      premio: 2,
+      crescimento: 0,
+    };
+    setRows((rs) => {
+      const existe = rs.findIndex((r) => r.ticker === novaLinha.ticker);
+      if (existe >= 0) {
+        const copia = [...rs];
+        copia[existe] = { ...copia[existe], preco: novaLinha.preco, tipo: novaLinha.tipo };
+        return copia;
+      }
+      return [...rs, novaLinha];
+    });
+    setTicker("");
+  }
+
+  function atualizarCampo(ticker, campo, valor) {
+    setRows((rs) => rs.map((r) => (r.ticker === ticker ? { ...r, [campo]: valor } : r)));
+  }
+
+  function remover(ticker) {
+    setRows((rs) => rs.filter((r) => r.ticker !== ticker));
+  }
+
+  const calculadas = useMemo(
+    () =>
+      rows.map((r) => {
+        const ref = refBenchmark(r.tipo, tesouro);
+        const k = ref ? ref.taxaLiquida + r.premio : null;
+        const denom = k != null ? k - r.crescimento : null;
+        const precoJusto = denom != null && denom > 0 ? r.dividendoAnual / (denom / 100) : null;
+        const margem = precoJusto != null && r.preco > 0 ? ((precoJusto - r.preco) / r.preco) * 100 : null;
+        return { ...r, ref, k, precoJusto, margem };
+      }),
+    [rows, tesouro]
+  );
+
+  return (
+    <div className="card-surface" style={{ background: PALETTE.surface, border: `1px solid ${PALETTE.line}`, borderRadius: 10, padding: 20, marginTop: 24 }}>
+      <div>
+        <div className="display" style={{ fontSize: 16, fontWeight: 500 }}>
+          FIIs — Modelo de Gordon
+        </div>
+        <div style={{ fontSize: 11.5, color: PALETTE.textMuted, marginTop: 2 }}>
+          Preço Justo = D ÷ (K − g), onde D é o dividendo anual, K a taxa de desconto (Tesouro líquido de IR + prêmio
+          de risco) e g o crescimento real esperado dos dividendos. Fundos de Tijolo/Híbrido usam o Tesouro IPCA+
+          como referência; fundos de Papel usam o Tesouro Prefixado (a inflação já está embutida no dividendo).
+          {tesouro && (
+            <>
+              {" "}
+              Taxas de {tesouro.dataBase}: IPCA+ {tesouro.ipca.taxaBruta}% bruto ({tesouro.ipca.taxaLiquida}%
+              líquido) · Prefixado {tesouro.prefixado.taxaBruta}% bruto ({tesouro.prefixado.taxaLiquida}% líquido).
+            </>
+          )}
+        </div>
+      </div>
+
+      <div style={{ position: "relative", display: "flex", gap: 8, alignItems: "center", margin: "14px 0", maxWidth: 320 }}>
+        <div style={{ position: "relative", flex: 1 }}>
+          <input
+            value={ticker}
+            onChange={(e) => {
+              setTicker(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onKeyDown={(e) => e.key === "Enter" && adicionar()}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            placeholder="Ticker (ex: GARE11)"
+            style={{ ...tickerInputStyle, width: "100%" }}
+          />
+          {showSuggestions && suggestions.length > 0 && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 4px)",
+                left: 0,
+                right: 0,
+                zIndex: 20,
+                background: PALETTE.bg,
+                border: `1px solid ${PALETTE.line}`,
+                borderRadius: 8,
+                maxHeight: 200,
+                overflowY: "auto",
+              }}
+            >
+              {suggestions.map((s) => (
+                <div
+                  key={s}
+                  onMouseDown={() => adicionar(s)}
+                  style={{ padding: "7px 10px", fontSize: 12.5, fontFamily: "'IBM Plex Mono', monospace", cursor: "pointer" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = PALETTE.surfaceAlt)}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  {s}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <button onClick={() => adicionar()} style={addBtnStyle}>
+          <Plus size={15} /> Adicionar
+        </button>
+      </div>
+      {error && <div style={{ color: PALETTE.crimson, fontSize: 12.5, marginBottom: 12 }}>{error}</div>}
+
+      {calculadas.length === 0 ? (
+        <div style={{ color: PALETTE.textMuted, padding: 24, textAlign: "center", fontSize: 13 }}>
+          Adicione um FII para calcular o preço justo pelo modelo de Gordon.
+        </div>
+      ) : (
+        <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${PALETTE.line}` }}>
+          <table style={{ width: "100%", minWidth: 920, borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: PALETTE.surfaceAlt, borderBottom: `1px solid ${PALETTE.line}` }}>
+                <th style={thStyle("left")}>Fundo</th>
+                <th style={thStyle("left")}>Tipo</th>
+                <th style={thStyle("right")}>Preço</th>
+                <th style={thStyle("right")}>D (Div. Anual)</th>
+                <th style={thStyle("left")}>Referência (K base)</th>
+                <th style={thStyle("right")}>Prêmio %</th>
+                <th style={thStyle("right")}>g %</th>
+                <th style={thStyle("right")}>K %</th>
+                <th style={{ ...thStyle("right"), color: PALETTE.gold }}>Preço Justo</th>
+                <th style={thStyle("right")}>Desconto</th>
+                <th style={thStyle("center")}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {calculadas.map((r, i) => (
+                <tr key={r.ticker} style={{ borderBottom: i < calculadas.length - 1 ? `1px dashed ${PALETTE.line}` : "none" }}>
+                  <td style={tdStyle("left")} className="mono">
+                    <span style={{ fontWeight: 700 }}>{r.ticker}</span>
+                  </td>
+                  <td style={tdStyle("left")}>
+                    <span style={{ fontSize: 11.5, color: PALETTE.textMuted }}>{r.tipo}</span>
+                  </td>
+                  <td style={tdStyle("right")} className="mono">
+                    {formatBRL(r.preco)}
+                  </td>
+                  <td style={tdStyle("right")}>
+                    <input style={numInputStyle} type="number" step="0.01" value={r.dividendoAnual} onChange={(e) => atualizarCampo(r.ticker, "dividendoAnual", Number(e.target.value))} />
+                  </td>
+                  <td style={tdStyle("left")}>
+                    {r.ref ? (
+                      <span style={{ fontSize: 11.5, color: PALETTE.textMuted }} className="mono">
+                        {r.ref.titulo} · {r.ref.taxaLiquida}%
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: 11.5, color: PALETTE.textMuted }}>—</span>
+                    )}
+                  </td>
+                  <td style={tdStyle("right")}>
+                    <input style={numInputStyle} type="number" step="0.1" value={r.premio} onChange={(e) => atualizarCampo(r.ticker, "premio", Number(e.target.value))} />
+                  </td>
+                  <td style={tdStyle("right")}>
+                    <input style={numInputStyle} type="number" step="0.1" value={r.crescimento} onChange={(e) => atualizarCampo(r.ticker, "crescimento", Number(e.target.value))} />
+                  </td>
+                  <td style={tdStyle("right")} className="mono">
+                    {r.k != null ? `${r.k.toFixed(2)}%` : "—"}
+                  </td>
+                  <td style={tdStyle("right", { background: "rgba(212,169,79,0.08)" })} className="mono">
+                    {r.precoJusto != null ? formatBRL(r.precoJusto) : "não aplicável"}
                   </td>
                   <td style={tdStyle("right")}>{margemBadge(r.margem)}</td>
                   <td style={tdStyle("center")}>

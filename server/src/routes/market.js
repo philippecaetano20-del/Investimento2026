@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { getFiiRanking } from "../services/fundamentus.js";
+import { getTaxasTesouro } from "../services/tesouro.js";
 
 const router = Router();
 const BRAPI_BASE = "https://brapi.dev/api";
@@ -122,6 +123,18 @@ router.get(
       res.json({ items, updatedAt });
     } catch (e) {
       res.status(502).json({ error: e.message || "Não foi possível obter o ranking de FIIs." });
+    }
+  })
+);
+
+router.get(
+  "/tesouro",
+  ah(async (req, res) => {
+    try {
+      const taxas = await getTaxasTesouro({ force: req.query.force === "1" });
+      res.json(taxas);
+    } catch (e) {
+      res.status(502).json({ error: e.message || "Não foi possível obter as taxas do Tesouro Direto." });
     }
   })
 );
