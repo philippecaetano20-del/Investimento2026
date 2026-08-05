@@ -29,4 +29,5 @@ export const api = {
   getQuote: (ticker, range = "3mo") => request(`/market/quote/${encodeURIComponent(ticker)}?range=${encodeURIComponent(range)}`),
   getWatchlist: (tickers) => request(`/market/watchlist?tickers=${encodeURIComponent(tickers.join(","))}`),
   getFiiRanking: () => request("/market/fii-ranking"),
+  getFundamentals: (ticker) => request(`/market/fundamentals/${encodeURIComponent(ticker)}`),
 };

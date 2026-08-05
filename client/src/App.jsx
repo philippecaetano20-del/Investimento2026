@@ -10,6 +10,7 @@ import { TabButton } from "./components/TabButton.jsx";
 import { LancamentosTab } from "./components/LancamentosTab.jsx";
 import { AssetsManager } from "./components/AssetsManager.jsx";
 import { MercadoTab } from "./components/MercadoTab.jsx";
+import { CalculadoraTab } from "./components/CalculadoraTab.jsx";
 
 export default function InvestmentDashboard() {
   const [entries, setEntries] = useState([]);
@@ -241,6 +242,9 @@ export default function InvestmentDashboard() {
         .reveal-3 { animation-delay: 0.18s; }
         @media (prefers-reduced-motion: reduce) { .reveal { animation: none; } }
 
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .spin { animation: spin 0.8s linear infinite; }
+
         .card-surface { transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
         .card-surface:hover {
           transform: translateY(-3px);
@@ -326,6 +330,9 @@ export default function InvestmentDashboard() {
           <TabButton active={activeTab === "mercado"} onClick={() => setActiveTab("mercado")}>
             Mercado
           </TabButton>
+          <TabButton active={activeTab === "calculadora"} onClick={() => setActiveTab("calculadora")}>
+            Calculadora
+          </TabButton>
         </div>
 
         <div className="reveal reveal-3">
@@ -343,6 +350,8 @@ export default function InvestmentDashboard() {
           <AssetsManager ativosList={ativosList} onAdd={addAtivo} onRename={renameAtivo} onRemove={removeAtivo} />
         ) : activeTab === "mercado" ? (
           <MercadoTab ativosList={ativosList} />
+        ) : activeTab === "calculadora" ? (
+          <CalculadoraTab />
         ) : activeTab === "lancamentos" ? (
           <LancamentosTab
             sortedEntries={sortedEntries}

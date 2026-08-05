@@ -70,6 +70,51 @@ router.get(
 );
 
 router.get(
+  "/fundamentals/:ticker",
+  ah(async (req, res) => {
+    const ticker = String(req.params.ticker || "").trim().toUpperCase();
+    if (!ticker) return res.status(400).json({ error: "Informe o ticker." });
+
+    const params = withToken(new URLSearchParams({ modules: "defaultKeyStatistics" }));
+    const r = await fetch(`${BRAPI_BASE}/quote/${encodeURIComponent(ticker)}?${params.toString()}`);
+    const data = await r.json();
+
+    if (!r.ok) {
+      if (data.code !== "MODULES_NOT_AVAILABLE") {
+        return res.status(404).json({ error: data.message || "Ativo não encontrado." });
+      }
+      try {
+        const base = await fetchQuote(ticker);
+        return res.json({
+          symbol: base.symbol,
+          longName: base.longName || base.shortName,
+          regularMarketPrice: base.regularMarketPrice,
+          lpa: base.earningsPerShare ?? null,
+          vpa: null,
+          dividendYield: null,
+          fundamentalsAvailable: false,
+        });
+      } catch (e) {
+        return res.status(404).json({ error: e.message });
+      }
+    }
+
+    const q = data.results?.[0];
+    if (!q) return res.status(404).json({ error: "Ativo não encontrado." });
+    const stats = q.defaultKeyStatistics || {};
+    res.json({
+      symbol: q.symbol,
+      longName: q.longName || q.shortName,
+      regularMarketPrice: q.regularMarketPrice,
+      lpa: q.earningsPerShare ?? stats.trailingEps ?? null,
+      vpa: stats.bookValue ?? null,
+      dividendYield: stats.dividendYield != null ? stats.dividendYield * 100 : null,
+      fundamentalsAvailable: stats.bookValue != null || q.earningsPerShare != null,
+    });
+  })
+);
+
+router.get(
   "/fii-ranking",
   ah(async (req, res) => {
     try {
