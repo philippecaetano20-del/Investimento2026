@@ -459,8 +459,8 @@ function CalculadoraFiis({ ranking }) {
                   <td style={tdStyle("left")} className="mono">
                     <span style={{ fontWeight: 700 }}>{r.ticker}</span>
                   </td>
-                  <td style={tdStyle("right")} className="mono">
-                    {formatBRL(r.preco)}
+                  <td style={tdStyle("right")}>
+                    <input style={numInputStyle} type="number" step="0.01" value={r.preco} onChange={(e) => atualizarCampo(r.ticker, "preco", Number(e.target.value))} />
                   </td>
                   <td style={tdStyle("right")}>
                     <input style={numInputStyle} type="number" step="0.01" value={r.dividendo12m} onChange={(e) => atualizarCampo(r.ticker, "dividendo12m", Number(e.target.value))} />
@@ -671,8 +671,8 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
                   <td style={tdStyle("left")}>
                     <span style={{ fontSize: 11.5, color: PALETTE.textMuted }}>{r.tipo}</span>
                   </td>
-                  <td style={tdStyle("right")} className="mono">
-                    {formatBRL(r.preco)}
+                  <td style={tdStyle("right")}>
+                    <input style={numInputStyle} type="number" step="0.01" value={r.preco} onChange={(e) => atualizarCampo(r.ticker, "preco", Number(e.target.value))} />
                   </td>
                   <td style={tdStyle("right")}>
                     <input style={numInputStyle} type="number" step="0.01" value={r.dividendoAnual} onChange={(e) => atualizarCampo(r.ticker, "dividendoAnual", Number(e.target.value))} />
