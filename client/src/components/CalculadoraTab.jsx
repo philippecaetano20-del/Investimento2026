@@ -653,7 +653,7 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
                 <th style={thStyle("left")}>Tipo</th>
                 <th style={thStyle("right")}>Preço</th>
                 <th style={thStyle("right")}>D (Div. Anual)</th>
-                <th style={thStyle("left")}>Referência (K base)</th>
+                <th style={thStyle("left")}>K (IPCA+ %)</th>
                 <th style={thStyle("right")}>Prêmio %</th>
                 <th style={thStyle("right")}>g %</th>
                 <th style={thStyle("right")}>K %</th>
@@ -678,9 +678,6 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
                     <input style={numInputStyle} type="number" step="0.01" value={r.dividendoAnual} onChange={(e) => atualizarCampo(r.ticker, "dividendoAnual", Number(e.target.value))} />
                   </td>
                   <td style={tdStyle("left")}>
-                    <div style={{ fontSize: 10.5, color: PALETTE.textMuted, marginBottom: 3, whiteSpace: "nowrap" }} className="mono">
-                      {r.tituloRef || "—"}
-                    </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
                       <input
                         style={{ ...numInputStyle, width: 64, textAlign: "left" }}
