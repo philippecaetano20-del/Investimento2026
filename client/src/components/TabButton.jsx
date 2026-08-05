@@ -16,6 +16,8 @@ export function TabButton({ active, onClick, children }) {
         fontWeight: 600,
         fontFamily: "'Manrope', sans-serif",
         cursor: "pointer",
+        whiteSpace: "nowrap",
+        flexShrink: 0,
         transition: "color 0.2s ease, background 0.2s ease, border-color 0.2s ease",
       }}
     >

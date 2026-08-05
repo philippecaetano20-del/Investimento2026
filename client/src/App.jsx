@@ -245,6 +245,13 @@ export default function InvestmentDashboard() {
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .spin { animation: spin 0.8s linear infinite; }
 
+        @media (max-width: 640px) {
+          .tabs-scroll {
+            mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+            -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
+          }
+        }
+
         .card-surface { transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
         .card-surface:hover {
           transform: translateY(-3px);
@@ -317,7 +324,10 @@ export default function InvestmentDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="reveal reveal-2" style={{ display: "flex", gap: 4, marginBottom: 24 }}>
+        <div
+          className="reveal reveal-2 tabs-scroll"
+          style={{ display: "flex", gap: 4, marginBottom: 24, overflowX: "auto", overflowY: "hidden", WebkitOverflowScrolling: "touch" }}
+        >
           <TabButton active={activeTab === "painel"} onClick={() => setActiveTab("painel")}>
             Painel
           </TabButton>
