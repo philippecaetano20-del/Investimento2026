@@ -525,11 +525,14 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
       return;
     }
     const dividendoAnual = item.dividendYield != null ? Number(((item.cotacao * item.dividendYield) / 100).toFixed(2)) : 0;
+    const ref = refBenchmark(item.tipo, tesouro);
     const novaLinha = {
       ticker: item.ticker,
       tipo: item.tipo,
       preco: item.cotacao || 0,
       dividendoAnual,
+      tituloRef: ref ? ref.titulo : "—",
+      taxaBase: ref ? ref.taxaLiquida : 0,
       premio: 2,
       crescimento: 0,
     };
@@ -556,12 +559,14 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
   const calculadas = useMemo(
     () =>
       rows.map((r) => {
-        const ref = refBenchmark(r.tipo, tesouro);
-        const k = ref ? ref.taxaLiquida + r.premio : null;
-        const denom = k != null ? k - r.crescimento : null;
-        const precoJusto = denom != null && denom > 0 ? r.dividendoAnual / (denom / 100) : null;
+        const fallback = refBenchmark(r.tipo, tesouro);
+        const taxaBase = r.taxaBase ?? fallback?.taxaLiquida ?? 0;
+        const tituloRef = r.tituloRef ?? fallback?.titulo ?? "—";
+        const k = taxaBase + r.premio;
+        const denom = k - r.crescimento;
+        const precoJusto = denom > 0 ? r.dividendoAnual / (denom / 100) : null;
         const margem = precoJusto != null && r.preco > 0 ? ((precoJusto - r.preco) / r.preco) * 100 : null;
-        return { ...r, ref, k, precoJusto, margem };
+        return { ...r, taxaBase, tituloRef, k, precoJusto, margem };
       }),
     [rows, tesouro]
   );
@@ -673,13 +678,19 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
                     <input style={numInputStyle} type="number" step="0.01" value={r.dividendoAnual} onChange={(e) => atualizarCampo(r.ticker, "dividendoAnual", Number(e.target.value))} />
                   </td>
                   <td style={tdStyle("left")}>
-                    {r.ref ? (
-                      <span style={{ fontSize: 11.5, color: PALETTE.textMuted }} className="mono">
-                        {r.ref.titulo} · {r.ref.taxaLiquida}%
-                      </span>
-                    ) : (
-                      <span style={{ fontSize: 11.5, color: PALETTE.textMuted }}>—</span>
-                    )}
+                    <div style={{ fontSize: 10.5, color: PALETTE.textMuted, marginBottom: 3, whiteSpace: "nowrap" }} className="mono">
+                      {r.tituloRef || "—"}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                      <input
+                        style={{ ...numInputStyle, width: 64, textAlign: "left" }}
+                        type="number"
+                        step="0.01"
+                        value={r.taxaBase}
+                        onChange={(e) => atualizarCampo(r.ticker, "taxaBase", Number(e.target.value))}
+                      />
+                      <span style={{ fontSize: 11.5, color: PALETTE.textMuted }}>%</span>
+                    </div>
                   </td>
                   <td style={tdStyle("right")}>
                     <input style={numInputStyle} type="number" step="0.1" value={r.premio} onChange={(e) => atualizarCampo(r.ticker, "premio", Number(e.target.value))} />
