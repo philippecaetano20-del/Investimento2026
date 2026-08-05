@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { getFiiRanking } from "../services/fundamentus.js";
 
 const router = Router();
 const BRAPI_BASE = "https://brapi.dev/api";
@@ -65,6 +66,18 @@ router.get(
     );
     const quotes = settled.filter((r) => r.status === "fulfilled").map((r) => r.value);
     res.json({ quotes });
+  })
+);
+
+router.get(
+  "/fii-ranking",
+  ah(async (req, res) => {
+    try {
+      const { items, updatedAt } = await getFiiRanking({ force: req.query.force === "1" });
+      res.json({ items, updatedAt });
+    } catch (e) {
+      res.status(502).json({ error: e.message || "Não foi possível obter o ranking de FIIs." });
+    }
   })
 );
 

@@ -4,6 +4,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { PALETTE } from "../constants.js";
 import { formatBRL } from "../utils.js";
 import { api } from "../api.js";
+import { RankingFiis } from "./RankingFiis.jsx";
 
 const RANGES = [
   { key: "1mo", label: "1M" },
@@ -315,6 +316,8 @@ export function MercadoTab({ ativosList }) {
           Busque uma ação ou FII acima para ver a cotação e o histórico de preços.
         </div>
       )}
+
+      <RankingFiis ativosList={ativosList} />
     </div>
   );
 }
