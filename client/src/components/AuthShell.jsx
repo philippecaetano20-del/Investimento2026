@@ -1,6 +1,5 @@
 import React from "react";
 import { PALETTE } from "../constants.js";
-import { FinanceBackground } from "./FinanceBackground.jsx";
 
 export function AuthShell({ children }) {
   return (
@@ -16,6 +15,18 @@ export function AuthShell({ children }) {
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,500;0,600;1,500&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+        .login-photo-bg {
+          position: absolute; inset: 0;
+          background-image: url('/login-bg.webp');
+          background-size: cover;
+          background-position: center 38%;
+        }
+        .login-scrim {
+          position: absolute; inset: 0;
+          background:
+            radial-gradient(ellipse 620px 480px at 50% 50%, rgba(6,9,16,0.55), transparent 62%),
+            linear-gradient(180deg, rgba(6,9,16,0.62) 0%, rgba(6,9,16,0.42) 30%, rgba(6,9,16,0.58) 70%, rgba(6,9,16,0.88) 100%);
+        }
         .login-grain {
           position: absolute; inset: 0; pointer-events: none; opacity: 0.035; mix-blend-mode: overlay;
           background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
@@ -25,7 +36,8 @@ export function AuthShell({ children }) {
         .login-input:focus { outline: none !important; border-color: ${PALETTE.gold} !important; box-shadow: 0 0 0 3px rgba(212,169,79,0.15); }
       `}</style>
 
-      <FinanceBackground />
+      <div className="login-photo-bg" />
+      <div className="login-scrim" />
       <div className="login-grain" />
 
       <div style={{ position: "relative", zIndex: 1, padding: "24px 32px" }}>
