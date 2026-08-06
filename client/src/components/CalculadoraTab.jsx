@@ -564,9 +564,10 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
         const tituloRef = r.tituloRef ?? fallback?.titulo ?? "—";
         const k = taxaBase + r.premio;
         const denom = k - r.crescimento;
-        const precoJusto = denom > 0 ? r.dividendoAnual / (denom / 100) : null;
+        const dividendoProjetado = r.dividendoAnual * (1 + r.crescimento / 100);
+        const precoJusto = denom > 0 ? dividendoProjetado / (denom / 100) : null;
         const margem = precoJusto != null && r.preco > 0 ? ((precoJusto - r.preco) / r.preco) * 100 : null;
-        return { ...r, taxaBase, tituloRef, k, precoJusto, margem };
+        return { ...r, taxaBase, tituloRef, k, dividendoProjetado, precoJusto, margem };
       }),
     [rows, tesouro]
   );
@@ -578,9 +579,10 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
           FIIs — Modelo de Gordon
         </div>
         <div style={{ fontSize: 11.5, color: PALETTE.textMuted, marginTop: 2 }}>
-          Preço Justo = D ÷ (K − g), onde D é o dividendo anual, K a taxa de desconto (Tesouro líquido de IR + prêmio
-          de risco) e g o crescimento real esperado dos dividendos. Fundos de Tijolo/Híbrido usam o Tesouro IPCA+
-          como referência; fundos de Papel usam o Tesouro Prefixado (a inflação já está embutida no dividendo).
+          Preço Justo = D × (1+g) ÷ (K − g), onde D é o dividendo anual, K a taxa de desconto (Tesouro líquido de IR +
+          prêmio de risco) e g o crescimento real esperado dos dividendos (o dividendo é projetado um período à
+          frente, versão completa do modelo de Gordon). Fundos de Tijolo/Híbrido usam o Tesouro IPCA+ como
+          referência; fundos de Papel usam o Tesouro Prefixado (a inflação já está embutida no dividendo).
           {tesouro && (
             <>
               {" "}
@@ -676,6 +678,9 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
                   </td>
                   <td style={tdStyle("right")}>
                     <input style={numInputStyle} type="number" step="0.01" value={r.dividendoAnual} onChange={(e) => atualizarCampo(r.ticker, "dividendoAnual", Number(e.target.value))} />
+                    <div style={{ fontSize: 10, color: PALETTE.textMuted, marginTop: 3 }} className="mono">
+                      proj. {formatBRL(r.dividendoProjetado)}
+                    </div>
                   </td>
                   <td style={tdStyle("left")}>
                     <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
