@@ -657,13 +657,14 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
         </div>
       ) : (
         <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${PALETTE.line}` }}>
-          <table style={{ width: "100%", minWidth: 1060, borderCollapse: "collapse" }}>
+          <table style={{ width: "100%", minWidth: 1150, borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: PALETTE.surfaceAlt, borderBottom: `1px solid ${PALETTE.line}` }}>
                 <th style={thStyle("left")}>Fundo</th>
                 <th style={thStyle("left")}>Tipo</th>
                 <th style={thStyle("right")}>Preço</th>
                 <th style={thStyle("right")}>D (Div. Anual)</th>
+                <th style={thStyle("right")}>D Projetado</th>
                 <th style={thStyle("left")}>IPCA+ %</th>
                 <th style={thStyle("right")}>Prêmio %</th>
                 <th style={thStyle("right")}>g %</th>
@@ -687,9 +688,9 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
                   </td>
                   <td style={tdStyle("right")}>
                     <input style={numInputStyle} type="number" step="0.01" value={r.dividendoAnual} onChange={(e) => atualizarCampo(r.ticker, "dividendoAnual", Number(e.target.value))} />
-                    <div style={{ fontSize: 10, color: PALETTE.textMuted, marginTop: 3 }} className="mono">
-                      proj. {formatBRL(r.dividendoProjetado)}
-                    </div>
+                  </td>
+                  <td style={tdStyle("right")} className="mono">
+                    {formatBRL(r.dividendoProjetado)}
                   </td>
                   <td style={tdStyle("left")}>
                     {r.tipo === "Papel" ? (
