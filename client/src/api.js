@@ -62,4 +62,7 @@ export const api = {
   getFiiRanking: () => request("/market/fii-ranking"),
   getFundamentals: (ticker) => request(`/market/fundamentals/${encodeURIComponent(ticker)}`),
   getTesouro: () => request("/market/tesouro"),
+
+  getMeta: (ano) => request(`/metas/${ano}`),
+  setMeta: (ano, valor) => request(`/metas/${ano}`, { method: "PUT", body: JSON.stringify({ valor }) }),
 };

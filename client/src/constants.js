@@ -19,5 +19,3 @@ export const HISTORICO_ANOS_ANTERIORES = {
   "2024": 24376.74,
   "2025": 52089.94,
 };
-
-export const META_ANUAL = 24000;

@@ -50,6 +50,14 @@ export async function initDb() {
       usedAt TEXT
     );
   `);
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS metas (
+      userId TEXT NOT NULL,
+      ano INTEGER NOT NULL,
+      valor REAL NOT NULL DEFAULT 0,
+      PRIMARY KEY (userId, ano)
+    );
+  `);
 
   const tableInfo = await db.execute("PRAGMA table_info(entries)");
   const entryColumns = tableInfo.rows.map((c) => c.name);

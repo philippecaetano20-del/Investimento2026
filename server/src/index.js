@@ -6,6 +6,7 @@ import authRouter from "./routes/auth.js";
 import entriesRouter from "./routes/entries.js";
 import ativosRouter from "./routes/ativos.js";
 import marketRouter from "./routes/market.js";
+import metasRouter from "./routes/metas.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -18,6 +19,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/entries", requireAuth, entriesRouter);
 app.use("/api/ativos", requireAuth, ativosRouter);
 app.use("/api/market", requireAuth, marketRouter);
+app.use("/api/metas", requireAuth, metasRouter);
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 

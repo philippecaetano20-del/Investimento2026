@@ -3,7 +3,7 @@ import { Wallet, LogOut, UserPlus, Copy, Check } from "lucide-react";
 import { PALETTE } from "./constants.js";
 import { formatBRL, monthLabel, emptyForm, parseNumBR } from "./utils.js";
 import { api, getToken, clearToken, setUnauthorizedHandler } from "./api.js";
-import { HISTORICO_ANOS_ANTERIORES, META_ANUAL } from "./constants.js";
+import { HISTORICO_ANOS_ANTERIORES } from "./constants.js";
 import { ChartCard, PieChartCard } from "./components/charts.jsx";
 import { MetaAnualCard } from "./components/MetaAnualCard.jsx";
 import { TabButton } from "./components/TabButton.jsx";
@@ -67,14 +67,21 @@ function Dashboard({ user, onLogout }) {
   const [form, setForm] = useState(emptyForm());
   const [error, setError] = useState("");
   const [saveError, setSaveError] = useState("");
+  const [meta, setMeta] = useState(0);
 
   useEffect(() => {
     const slowTimer = setTimeout(() => setSlowLoading(true), 4000);
     (async () => {
       try {
-        const [entriesData, ativosData] = await Promise.all([api.listEntries(), api.listAtivos()]);
+        const anoAtual = new Date().getFullYear();
+        const [entriesData, ativosData, metaData] = await Promise.all([
+          api.listEntries(),
+          api.listAtivos(),
+          api.getMeta(anoAtual),
+        ]);
         setEntries(entriesData);
         setAtivosList(ativosData);
+        setMeta(metaData.valor);
       } catch (e) {
         setSaveError("Não foi possível carregar os dados do servidor.");
       } finally {
@@ -84,6 +91,12 @@ function Dashboard({ user, onLogout }) {
     })();
     return () => clearTimeout(slowTimer);
   }, []);
+
+  async function saveMeta(valor) {
+    const anoAtual = new Date().getFullYear();
+    const data = await api.setMeta(anoAtual, valor);
+    setMeta(data.valor);
+  }
 
   async function addAtivo(nome) {
     const trimmed = nome.trim();
@@ -453,7 +466,7 @@ function Dashboard({ user, onLogout }) {
               <ChartCard title="Por ano" data={porAno} />
             </div>
 
-            <MetaAnualCard ano={anoAtual} investidoAno={investidoAnoAtual} meta={META_ANUAL} />
+            <MetaAnualCard ano={anoAtual} investidoAno={investidoAnoAtual} meta={meta} onSaveMeta={saveMeta} />
           </>
         )}
         </div>
