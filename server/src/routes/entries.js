@@ -17,11 +17,12 @@ const COLUMNS = [
   "valorReinvestido",
   "estaReinvestido",
 ];
+const ALL_COLUMNS = [...COLUMNS, "userId"];
 
-const INSERT_SQL = `INSERT INTO entries (${COLUMNS.join(", ")}) VALUES (${COLUMNS.map(() => "?").join(", ")})`;
+const INSERT_SQL = `INSERT INTO entries (${ALL_COLUMNS.join(", ")}) VALUES (${ALL_COLUMNS.map(() => "?").join(", ")})`;
 const UPDATE_SQL = `UPDATE entries SET ${COLUMNS.filter((c) => c !== "id")
   .map((c) => `${c} = ?`)
-  .join(", ")} WHERE id = ?`;
+  .join(", ")} WHERE id = ? AND userId = ?`;
 
 function num(v) {
   const n = Number(v);
@@ -52,7 +53,7 @@ function toEntryRow(body, id) {
 }
 
 function rowValues(row) {
-  return COLUMNS.map((c) => row[c]);
+  return ALL_COLUMNS.map((c) => row[c]);
 }
 
 function ah(fn) {
@@ -62,7 +63,10 @@ function ah(fn) {
 router.get(
   "/",
   ah(async (req, res) => {
-    const result = await db.execute(`SELECT ${COLUMNS.join(", ")} FROM entries ORDER BY data DESC`);
+    const result = await db.execute({
+      sql: `SELECT ${COLUMNS.join(", ")} FROM entries WHERE userId = ? ORDER BY data DESC`,
+      args: [req.user.id],
+    });
     res.json(result.rows);
   })
 );
@@ -80,7 +84,7 @@ router.post(
     }
     if (!data) return res.status(400).json({ error: "Informe a data." });
 
-    const row = toEntryRow(req.body, randomUUID());
+    const row = { ...toEntryRow(req.body, randomUUID()), userId: req.user.id };
     await db.execute({ sql: INSERT_SQL, args: rowValues(row) });
     res.status(201).json(row);
   })
@@ -89,12 +93,15 @@ router.post(
 router.put(
   "/:id",
   ah(async (req, res) => {
-    const existing = await db.execute({ sql: "SELECT id FROM entries WHERE id = ?", args: [req.params.id] });
+    const existing = await db.execute({
+      sql: "SELECT id FROM entries WHERE id = ? AND userId = ?",
+      args: [req.params.id, req.user.id],
+    });
     if (existing.rows.length === 0) return res.status(404).json({ error: "Lançamento não encontrado." });
 
-    const row = toEntryRow(req.body, req.params.id);
+    const row = { ...toEntryRow(req.body, req.params.id), userId: req.user.id };
     const updateValues = COLUMNS.filter((c) => c !== "id").map((c) => row[c]);
-    await db.execute({ sql: UPDATE_SQL, args: [...updateValues, row.id] });
+    await db.execute({ sql: UPDATE_SQL, args: [...updateValues, row.id, req.user.id] });
     res.json(row);
   })
 );
@@ -102,7 +109,7 @@ router.put(
 router.delete(
   "/:id",
   ah(async (req, res) => {
-    await db.execute({ sql: "DELETE FROM entries WHERE id = ?", args: [req.params.id] });
+    await db.execute({ sql: "DELETE FROM entries WHERE id = ? AND userId = ?", args: [req.params.id, req.user.id] });
     res.status(204).end();
   })
 );
@@ -115,7 +122,10 @@ router.post(
 
     const tx = await db.transaction("write");
     try {
-      const existentesResult = await tx.execute(`SELECT ${COLUMNS.join(", ")} FROM entries`);
+      const existentesResult = await tx.execute({
+        sql: `SELECT ${COLUMNS.join(", ")} FROM entries WHERE userId = ?`,
+        args: [req.user.id],
+      });
       const existentes = existentesResult.rows.map((r) => ({ ...r }));
 
       const encontraIgual = (novo) =>
@@ -150,8 +160,8 @@ router.post(
             Number(existente.estaReinvestido) !== dados.estaReinvestido;
           if (mudou) {
             await tx.execute({
-              sql: "UPDATE entries SET tipo = ?, valorInvestido = ?, valorReinvestido = ?, estaReinvestido = ? WHERE id = ?",
-              args: [dados.tipo, dados.valorInvestido, dados.valorReinvestido, dados.estaReinvestido, existente.id],
+              sql: "UPDATE entries SET tipo = ?, valorInvestido = ?, valorReinvestido = ?, estaReinvestido = ? WHERE id = ? AND userId = ?",
+              args: [dados.tipo, dados.valorInvestido, dados.valorReinvestido, dados.estaReinvestido, existente.id, req.user.id],
             });
             existente.tipo = dados.tipo;
             existente.valorInvestido = dados.valorInvestido;
@@ -160,7 +170,7 @@ router.post(
             atualizados++;
           }
         } else {
-          const row = { ...dados, id: randomUUID() };
+          const row = { ...dados, id: randomUUID(), userId: req.user.id };
           await tx.execute({ sql: INSERT_SQL, args: rowValues(row) });
           existentes.push(row);
           adicionados++;

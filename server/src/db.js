@@ -1,6 +1,7 @@
 import { createClient } from "@libsql/client";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { randomUUID } from "node:crypto";
 import { DEFAULT_ATIVOS } from "./seedData.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -31,6 +32,24 @@ export async function initDb() {
       nome TEXT PRIMARY KEY
     );
   `);
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      email TEXT NOT NULL UNIQUE,
+      nome TEXT NOT NULL,
+      passwordHash TEXT NOT NULL,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+  `);
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS invites (
+      token TEXT PRIMARY KEY,
+      createdBy TEXT NOT NULL,
+      usedBy TEXT,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+      usedAt TEXT
+    );
+  `);
 
   const tableInfo = await db.execute("PRAGMA table_info(entries)");
   const entryColumns = tableInfo.rows.map((c) => c.name);
@@ -41,13 +60,31 @@ export async function initDb() {
   if (entryColumns.includes("reservaOportunidade")) {
     await db.execute("ALTER TABLE entries DROP COLUMN reservaOportunidade;");
   }
+  if (!entryColumns.includes("userId")) {
+    await db.execute("ALTER TABLE entries ADD COLUMN userId TEXT;");
+  }
+
+  const ativosInfo = await db.execute("PRAGMA table_info(ativos)");
+  const ativosColumns = ativosInfo.rows.map((c) => c.name);
+  if (!ativosColumns.includes("userId")) {
+    await db.execute("ALTER TABLE ativos RENAME TO ativos_legacy;");
+    await db.execute(`
+      CREATE TABLE ativos (
+        id TEXT PRIMARY KEY,
+        userId TEXT,
+        nome TEXT NOT NULL,
+        UNIQUE(userId, nome)
+      );
+    `);
+  }
 
   const ativosCount = await db.execute("SELECT COUNT(*) AS c FROM ativos");
-  if (Number(ativosCount.rows[0].c) === 0) {
+  const legacyExists = await db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='ativos_legacy'");
+  if (Number(ativosCount.rows[0].c) === 0 && legacyExists.rows.length === 0) {
     const tx = await db.transaction("write");
     try {
       for (const nome of DEFAULT_ATIVOS) {
-        await tx.execute({ sql: "INSERT OR IGNORE INTO ativos (nome) VALUES (?)", args: [nome] });
+        await tx.execute({ sql: "INSERT OR IGNORE INTO ativos (id, userId, nome) VALUES (?, NULL, ?)", args: [randomUUID(), nome] });
       }
       await tx.commit();
     } catch (e) {

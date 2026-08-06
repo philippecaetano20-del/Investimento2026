@@ -1,10 +1,35 @@
 const BASE = import.meta.env.VITE_API_URL || "/api";
+const TOKEN_KEY = "investidor_token";
+
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+export function setToken(token) {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+export function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+let onUnauthorized = null;
+export function setUnauthorizedHandler(fn) {
+  onUnauthorized = fn;
+}
+
+const PUBLIC_PATHS = ["/auth/login", "/auth/accept-invite", "/auth/invites/"];
 
 async function request(path, options) {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
+  const token = getToken();
+  const headers = { "Content-Type": "application/json", ...(options?.headers || {}) };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE}${path}`, { ...options, headers });
+
+  if (res.status === 401 && !PUBLIC_PATHS.some((p) => path.startsWith(p))) {
+    clearToken();
+    if (onUnauthorized) onUnauthorized();
+  }
+
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || `Erro na requisição (${res.status})`);
@@ -14,6 +39,12 @@ async function request(path, options) {
 }
 
 export const api = {
+  login: (email, senha) => request("/auth/login", { method: "POST", body: JSON.stringify({ email, senha }) }),
+  me: () => request("/auth/me"),
+  checkInvite: (token) => request(`/auth/invites/${encodeURIComponent(token)}`),
+  acceptInvite: (data) => request("/auth/accept-invite", { method: "POST", body: JSON.stringify(data) }),
+  createInvite: () => request("/auth/invites", { method: "POST" }),
+
   listEntries: () => request("/entries"),
   createEntry: (entry) => request("/entries", { method: "POST", body: JSON.stringify(entry) }),
   updateEntry: (id, entry) => request(`/entries/${id}`, { method: "PUT", body: JSON.stringify(entry) }),

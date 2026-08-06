@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Wallet } from "lucide-react";
+import { Wallet, LogOut, UserPlus, Copy, Check } from "lucide-react";
 import { PALETTE } from "./constants.js";
 import { formatBRL, monthLabel, emptyForm, parseNumBR } from "./utils.js";
-import { api } from "./api.js";
+import { api, getToken, clearToken, setUnauthorizedHandler } from "./api.js";
 import { HISTORICO_ANOS_ANTERIORES, META_ANUAL } from "./constants.js";
 import { ChartCard, PieChartCard } from "./components/charts.jsx";
 import { MetaAnualCard } from "./components/MetaAnualCard.jsx";
@@ -11,8 +11,53 @@ import { LancamentosTab } from "./components/LancamentosTab.jsx";
 import { AssetsManager } from "./components/AssetsManager.jsx";
 import { MercadoTab } from "./components/MercadoTab.jsx";
 import { CalculadoraTab } from "./components/CalculadoraTab.jsx";
+import { LoginPage } from "./components/LoginPage.jsx";
+import { AcceptInvitePage } from "./components/AcceptInvitePage.jsx";
 
-export default function InvestmentDashboard() {
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const inviteToken = new URLSearchParams(window.location.search).get("convite");
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => setUser(null));
+    const token = getToken();
+    if (!token) {
+      setCheckingAuth(false);
+      return;
+    }
+    api
+      .me()
+      .then((data) => setUser(data.user))
+      .catch(() => clearToken())
+      .finally(() => setCheckingAuth(false));
+  }, []);
+
+  function handleLogout() {
+    clearToken();
+    setUser(null);
+  }
+
+  if (inviteToken && !user) {
+    return <AcceptInvitePage token={inviteToken} onAccepted={setUser} />;
+  }
+
+  if (checkingAuth) {
+    return (
+      <div style={{ position: "fixed", inset: 0, background: PALETTE.bg, display: "flex", alignItems: "center", justifyContent: "center", color: PALETTE.textMuted, fontSize: 13 }}>
+        Carregando...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage onLoggedIn={setUser} />;
+  }
+
+  return <Dashboard user={user} onLogout={handleLogout} />;
+}
+
+function Dashboard({ user, onLogout }) {
   const [entries, setEntries] = useState([]);
   const [ativosList, setAtivosList] = useState([]);
   const [activeTab, setActiveTab] = useState("painel");
@@ -273,6 +318,19 @@ export default function InvestmentDashboard() {
       <div className="grain-overlay" />
 
       <div style={{ maxWidth: 1400, margin: "0 auto", position: "relative", zIndex: 1 }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 14, marginBottom: 10, fontSize: 12 }}>
+          <span style={{ color: PALETTE.textMuted }}>
+            Olá, <span style={{ color: PALETTE.textPrimary, fontWeight: 600 }}>{user.nome}</span>
+          </span>
+          <InviteButton />
+          <button
+            onClick={onLogout}
+            style={{ display: "flex", alignItems: "center", gap: 5, background: "transparent", border: "none", color: PALETTE.textMuted, cursor: "pointer", fontSize: 12, fontFamily: "'Manrope', sans-serif", padding: 0 }}
+          >
+            <LogOut size={13} /> Sair
+          </button>
+        </div>
+
         {/* Header */}
         <div
           className="reveal reveal-1"
@@ -400,6 +458,93 @@ export default function InvestmentDashboard() {
         )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function InviteButton() {
+  const [open, setOpen] = useState(false);
+  const [link, setLink] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState("");
+
+  async function gerarConvite() {
+    setOpen(true);
+    setError("");
+    setCopied(false);
+    if (link) return;
+    setLoading(true);
+    try {
+      const data = await api.createInvite();
+      setLink(`${window.location.origin}${window.location.pathname}?convite=${data.token}`);
+    } catch (e) {
+      setError(e.message || "Não foi possível gerar o convite.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function copiar() {
+    navigator.clipboard.writeText(link).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div style={{ position: "relative" }}>
+      <button
+        onClick={gerarConvite}
+        style={{ display: "flex", alignItems: "center", gap: 5, background: "transparent", border: "none", color: PALETTE.gold, cursor: "pointer", fontSize: 12, fontFamily: "'Manrope', sans-serif", padding: 0 }}
+      >
+        <UserPlus size={13} /> Convidar
+      </button>
+
+      {open && (
+        <>
+          <div style={{ position: "fixed", inset: 0, zIndex: 999 }} onClick={() => setOpen(false)} />
+          <div
+            style={{
+              position: "absolute",
+              top: "calc(100% + 8px)",
+              right: 0,
+              zIndex: 1000,
+              width: 300,
+              background: PALETTE.surfaceAlt,
+              border: `1px solid ${PALETTE.line}`,
+              borderRadius: 8,
+              padding: 14,
+              boxShadow: "0 16px 40px -12px rgba(0,0,0,0.6)",
+            }}
+          >
+            <div style={{ fontSize: 11.5, color: PALETTE.textMuted, marginBottom: 8 }}>
+              Envie este link para a pessoa criar a própria conta:
+            </div>
+            {loading ? (
+              <div style={{ fontSize: 12, color: PALETTE.textMuted }}>Gerando link...</div>
+            ) : error ? (
+              <div style={{ fontSize: 12, color: PALETTE.crimson }}>{error}</div>
+            ) : (
+              <div style={{ display: "flex", gap: 6 }}>
+                <input
+                  readOnly
+                  value={link}
+                  onClick={(e) => e.target.select()}
+                  className="mono"
+                  style={{ flex: 1, background: PALETTE.bg, border: `1px solid ${PALETTE.line}`, borderRadius: 6, padding: "6px 8px", color: PALETTE.textPrimary, fontSize: 11 }}
+                />
+                <button
+                  onClick={copiar}
+                  style={{ display: "flex", alignItems: "center", gap: 4, background: PALETTE.gold, color: "#1A1406", border: "none", borderRadius: 6, padding: "6px 10px", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}
+                >
+                  {copied ? <Check size={12} /> : <Copy size={12} />}
+                </button>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
