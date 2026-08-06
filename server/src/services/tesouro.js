@@ -1,5 +1,6 @@
 const CSV_URL =
   "https://www.tesourotransparente.gov.br/ckan/dataset/df56aa42-484a-4a59-8184-7676580c81e3/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/precotaxatesourodireto.csv";
+const IPCA_12M_URL = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.13522/dados/ultimos/1?formato=json";
 
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12 horas
 const IR_LONGO_PRAZO = 0.15; // alíquota mínima (>720 dias) da tabela regressiva
@@ -25,11 +26,29 @@ function melhorReferencia(rows, tipoExato) {
   return melhor;
 }
 
+function toResultado(r) {
+  const bruta = r.taxaCompra;
+  const liquida = bruta != null ? Number((bruta * (1 - IR_LONGO_PRAZO)).toFixed(2)) : null;
+  return { titulo: `${r.tipo.replace("Tesouro ", "")} ${r.vencimento.slice(-4)}`, vencimento: r.vencimento, taxaBruta: bruta, taxaLiquida: liquida };
+}
+
 async function baixarCsv() {
   const res = await fetch(CSV_URL);
   if (!res.ok) throw new Error(`Falha ao acessar Tesouro Transparente (${res.status})`);
   const buffer = await res.arrayBuffer();
   return new TextDecoder("utf-8").decode(buffer);
+}
+
+async function buscarInflacao12m() {
+  try {
+    const res = await fetch(IPCA_12M_URL);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const valor = Number(data?.[0]?.valor);
+    return Number.isFinite(valor) ? valor : null;
+  } catch {
+    return null;
+  }
 }
 
 function parseTaxas(csv) {
@@ -64,16 +83,16 @@ function parseTaxas(csv) {
   const prefixado = melhorReferencia(recentes, "Tesouro Prefixado");
   if (!ipca || !prefixado) throw new Error("Não foi possível localizar as taxas de referência do Tesouro Direto.");
 
-  function toResultado(r) {
-    const bruta = r.taxaCompra;
-    const liquida = bruta != null ? Number((bruta * (1 - IR_LONGO_PRAZO)).toFixed(2)) : null;
-    return { titulo: `${r.tipo.replace("Tesouro ", "")} ${r.vencimento.slice(-4)}`, vencimento: r.vencimento, taxaBruta: bruta, taxaLiquida: liquida };
-  }
+  const ipcaOpcoes = recentes
+    .filter((r) => r.tipo === "Tesouro IPCA+")
+    .sort((a, b) => a.vencimentoTs - b.vencimentoTs)
+    .map(toResultado);
 
   return {
     dataBase: new Date(maxTs).toLocaleDateString("pt-BR"),
     ipca: toResultado(ipca),
     prefixado: toResultado(prefixado),
+    ipcaOpcoes,
   };
 }
 
@@ -82,8 +101,8 @@ export async function getTaxasTesouro({ force = false } = {}) {
   if (!force && cache.data && agora - cache.fetchedAt < CACHE_TTL_MS) {
     return cache.data;
   }
-  const csv = await baixarCsv();
-  const data = parseTaxas(csv);
+  const [csv, inflacao12m] = await Promise.all([baixarCsv(), buscarInflacao12m()]);
+  const data = { ...parseTaxas(csv), inflacao12m };
   cache = { data, fetchedAt: agora };
   return data;
 }

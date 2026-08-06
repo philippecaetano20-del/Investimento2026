@@ -531,8 +531,8 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
       tipo: item.tipo,
       preco: item.cotacao || 0,
       dividendoAnual,
-      tituloRef: ref ? ref.titulo : "—",
-      taxaBase: ref ? ref.taxaLiquida : 0,
+      taxaBase: item.tipo === "Papel" && ref ? ref.taxaLiquida : 0,
+      vencimentoSelecionado: ref ? ref.vencimento : "",
       premio: 2,
       crescimento: 0,
     };
@@ -559,9 +559,18 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
   const calculadas = useMemo(
     () =>
       rows.map((r) => {
-        const fallback = refBenchmark(r.tipo, tesouro);
-        const taxaBase = r.taxaBase ?? fallback?.taxaLiquida ?? 0;
-        const tituloRef = r.tituloRef ?? fallback?.titulo ?? "—";
+        let taxaBase, tituloRef;
+        if (r.tipo === "Papel") {
+          const fallback = tesouro?.prefixado;
+          taxaBase = r.taxaBase ?? fallback?.taxaLiquida ?? 0;
+          tituloRef = fallback ? `Tesouro ${fallback.titulo}` : "—";
+        } else {
+          const opcoes = tesouro?.ipcaOpcoes || [];
+          const selecionada = opcoes.find((o) => o.vencimento === r.vencimentoSelecionado) || tesouro?.ipca;
+          const inflacao = tesouro?.inflacao12m ?? 0;
+          taxaBase = selecionada ? Number((selecionada.taxaLiquida + inflacao).toFixed(2)) : 0;
+          tituloRef = selecionada ? `Tesouro ${selecionada.titulo}` : "—";
+        }
         const k = taxaBase + r.premio;
         const denom = k - r.crescimento;
         const dividendoProjetado = r.dividendoAnual * (1 + r.crescimento / 100);
@@ -579,15 +588,15 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
           FIIs — Modelo de Gordon
         </div>
         <div style={{ fontSize: 11.5, color: PALETTE.textMuted, marginTop: 2 }}>
-          Preço Justo = D × (1+g) ÷ (K − g), onde D é o dividendo anual, K a taxa de desconto (Tesouro líquido de IR +
-          prêmio de risco) e g o crescimento real esperado dos dividendos (o dividendo é projetado um período à
-          frente, versão completa do modelo de Gordon). Fundos de Tijolo/Híbrido usam o Tesouro IPCA+ como
-          referência; fundos de Papel usam o Tesouro Prefixado (a inflação já está embutida no dividendo).
+          Preço Justo = D × (1+g) ÷ (K − g), onde D é o dividendo anual e g o crescimento real esperado. Para fundos
+          de Tijolo/Híbrido, escolha o título Tesouro IPCA+ de referência: IPCA+ % = (taxa do título × 0,85, líquida
+          de IR) + inflação (IPCA) acumulada nos últimos 12 meses — e depois some o Prêmio de risco pra chegar em K.
+          Fundos de Papel usam o Tesouro Prefixado direto (a inflação já está embutida no próprio dividendo).
           {tesouro && (
             <>
               {" "}
-              Taxas de {tesouro.dataBase}: IPCA+ {tesouro.ipca.taxaBruta}% bruto ({tesouro.ipca.taxaLiquida}%
-              líquido) · Prefixado {tesouro.prefixado.taxaBruta}% bruto ({tesouro.prefixado.taxaLiquida}% líquido).
+              Dados de {tesouro.dataBase}: IPCA acumulado 12m {tesouro.inflacao12m}% (Banco Central) · Prefixado{" "}
+              {tesouro.prefixado.taxaBruta}% bruto ({tesouro.prefixado.taxaLiquida}% líquido).
             </>
           )}
         </div>
@@ -648,14 +657,14 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
         </div>
       ) : (
         <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${PALETTE.line}` }}>
-          <table style={{ width: "100%", minWidth: 920, borderCollapse: "collapse" }}>
+          <table style={{ width: "100%", minWidth: 1060, borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: PALETTE.surfaceAlt, borderBottom: `1px solid ${PALETTE.line}` }}>
                 <th style={thStyle("left")}>Fundo</th>
                 <th style={thStyle("left")}>Tipo</th>
                 <th style={thStyle("right")}>Preço</th>
                 <th style={thStyle("right")}>D (Div. Anual)</th>
-                <th style={thStyle("left")}>K (IPCA+ %)</th>
+                <th style={thStyle("left")}>IPCA+ %</th>
                 <th style={thStyle("right")}>Prêmio %</th>
                 <th style={thStyle("right")}>g %</th>
                 <th style={thStyle("right")}>K %</th>
@@ -683,16 +692,35 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
                     </div>
                   </td>
                   <td style={tdStyle("left")}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                      <input
-                        style={{ ...numInputStyle, width: 64, textAlign: "left" }}
-                        type="number"
-                        step="0.01"
-                        value={r.taxaBase}
-                        onChange={(e) => atualizarCampo(r.ticker, "taxaBase", Number(e.target.value))}
-                      />
-                      <span style={{ fontSize: 11.5, color: PALETTE.textMuted }}>%</span>
-                    </div>
+                    {r.tipo === "Papel" ? (
+                      <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                        <input
+                          style={{ ...numInputStyle, width: 64, textAlign: "left" }}
+                          type="number"
+                          step="0.01"
+                          value={r.taxaBase}
+                          onChange={(e) => atualizarCampo(r.ticker, "taxaBase", Number(e.target.value))}
+                        />
+                        <span style={{ fontSize: 11.5, color: PALETTE.textMuted }}>%</span>
+                      </div>
+                    ) : (
+                      <div style={{ minWidth: 200 }}>
+                        <select
+                          value={r.vencimentoSelecionado || ""}
+                          onChange={(e) => atualizarCampo(r.ticker, "vencimentoSelecionado", e.target.value)}
+                          style={{ ...numInputStyle, width: "100%", textAlign: "left" }}
+                        >
+                          {(tesouro?.ipcaOpcoes || []).map((o) => (
+                            <option key={o.vencimento} value={o.vencimento}>
+                              Tesouro {o.titulo} - {o.taxaBruta}%
+                            </option>
+                          ))}
+                        </select>
+                        <div style={{ fontSize: 10, color: PALETTE.textMuted, marginTop: 3 }} className="mono">
+                          {r.tituloRef}: {r.taxaBase != null ? r.taxaBase.toFixed(2) : "—"}%
+                        </div>
+                      </div>
+                    )}
                   </td>
                   <td style={tdStyle("right")}>
                     <input style={numInputStyle} type="number" step="0.1" value={r.premio} onChange={(e) => atualizarCampo(r.ticker, "premio", Number(e.target.value))} />
