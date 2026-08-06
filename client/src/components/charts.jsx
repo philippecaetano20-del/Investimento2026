@@ -52,19 +52,30 @@ export function Bar3DLabel(colors) {
     const color = colors[index % colors.length];
     return (
       <g>
-        <rect x={bx} y={by} width={boxWidth} height={boxHeight} rx={4} fill="#F7F5EF" stroke={color} strokeWidth={1.4} shapeRendering="geometricPrecision" />
-        <text
-          x={cx}
-          y={by + Math.round(boxHeight / 2) + 4}
-          textAnchor="middle"
-          fontSize={12}
-          fontFamily="'IBM Plex Mono', monospace"
-          fontWeight={700}
-          fill="#1A2333"
-          style={{ textRendering: "optimizeLegibility" }}
-        >
-          {text}
-        </text>
+        {/* rótulo em HTML (via foreignObject) para texto nítido, sem o anti-aliasing borrado do <text> SVG em telas fracionadas */}
+        <foreignObject x={bx} y={by} width={boxWidth} height={boxHeight} style={{ overflow: "visible" }}>
+          <div
+            xmlns="http://www.w3.org/1999/xhtml"
+            style={{
+              boxSizing: "border-box",
+              width: boxWidth,
+              height: boxHeight,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "#F7F5EF",
+              border: `1.4px solid ${color}`,
+              borderRadius: 4,
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 12,
+              fontWeight: 700,
+              color: "#1A2333",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {text}
+          </div>
+        </foreignObject>
         <polygon
           points={`${cx - 5},${by + boxHeight - 1} ${cx + 5},${by + boxHeight - 1} ${cx},${by + boxHeight + 7}`}
           fill="#F7F5EF"
