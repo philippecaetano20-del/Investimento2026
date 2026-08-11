@@ -153,7 +153,8 @@ function Dashboard({ user, onLogout }) {
       setError("Informe um valor pago válido.");
       return;
     }
-    if (!form.quantidade || isNaN(parseNumBR(form.quantidade))) {
+    const isRendaFixa = form.tipo === "Renda Fixa";
+    if (!isRendaFixa && (!form.quantidade || isNaN(parseNumBR(form.quantidade)))) {
       setError("Informe uma quantidade válida.");
       return;
     }
@@ -167,7 +168,7 @@ function Dashboard({ user, onLogout }) {
       nivel: form.nivel,
       data: form.data,
       valorPago: parseNumBR(form.valorPago) || 0,
-      quantidade: parseNumBR(form.quantidade) || 0,
+      quantidade: isRendaFixa ? 1 : parseNumBR(form.quantidade) || 0,
       rentabilidade: parseNumBR(form.rentabilidade) || 0,
       valorReinvestido: parseNumBR(form.valorReinvestido) || 0,
       estaReinvestido: form.estaReinvestido === "Sim",

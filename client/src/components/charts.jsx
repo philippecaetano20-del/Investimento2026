@@ -173,8 +173,9 @@ export function renderPie2D({ data, colors, cyTop, outerRadius, innerRadius = 0,
 }
 
 export function PieChartCard({ title, data }) {
-  const total = data.reduce((s, d) => s + d.value, 0);
-  const sorted = [...data].sort((a, b) => b.value - a.value);
+  const positivos = data.filter((d) => d.value > 0);
+  const total = positivos.reduce((s, d) => s + d.value, 0);
+  const sorted = [...positivos].sort((a, b) => b.value - a.value);
   return (
     <div
       className="card-surface"

@@ -30,10 +30,17 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
   };
   const moneyInput = { ...input, paddingLeft: 30 };
 
-  const calculado = (parseNumBR(form.valorPago) || 0) * (parseNumBR(form.quantidade) || 0);
+  const isRendaFixa = form.tipo === "Renda Fixa";
+  const quantidadeEfetiva = isRendaFixa ? 1 : parseNumBR(form.quantidade) || 0;
+  const calculado = (parseNumBR(form.valorPago) || 0) * quantidadeEfetiva;
   const reinvestido = form.estaReinvestido === "Sim";
   const valorInvestidoExibido = reinvestido ? 0 : calculado;
-  const readonlyMoneyStyle = { ...moneyInput, color: PALETTE.gold, fontWeight: 600, cursor: "not-allowed" };
+  const readonlyMoneyStyle = (valor) => ({
+    ...moneyInput,
+    color: valor < 0 ? PALETTE.crimson : PALETTE.gold,
+    fontWeight: 600,
+    cursor: "not-allowed",
+  });
 
   return (
     <div
@@ -105,11 +112,18 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
                 <span style={moneyPrefix}>R$</span>
                 <input type="text" inputMode="decimal" style={moneyInput} value={form.valorPago} onChange={set("valorPago")} placeholder="0,00" />
               </div>
+              {isRendaFixa && (
+                <div style={{ fontSize: 10.5, color: PALETTE.textMuted, marginTop: 4 }}>
+                  Dica: digite um valor negativo (ex: -500) para registrar uma retirada.
+                </div>
+              )}
             </div>
-            <div>
-              <label style={label}>Quantidade</label>
-              <input type="text" inputMode="decimal" style={input} value={form.quantidade} onChange={set("quantidade")} placeholder="0" />
-            </div>
+            {!isRendaFixa && (
+              <div>
+                <label style={label}>Quantidade</label>
+                <input type="text" inputMode="decimal" style={input} value={form.quantidade} onChange={set("quantidade")} placeholder="0" />
+              </div>
+            )}
             <div>
               <label style={label}>Está Reinvestido?</label>
               <select style={input} value={form.estaReinvestido || "Não"} onChange={set("estaReinvestido")}>
@@ -124,7 +138,7 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
                 <input
                   type="text"
                   readOnly
-                  style={readonlyMoneyStyle}
+                  style={readonlyMoneyStyle(valorInvestidoExibido)}
                   value={valorInvestidoExibido.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 />
               </div>
@@ -140,7 +154,7 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
                 <input
                   type="text"
                   readOnly
-                  style={readonlyMoneyStyle}
+                  style={readonlyMoneyStyle(calculado)}
                   value={calculado.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 />
               </div>

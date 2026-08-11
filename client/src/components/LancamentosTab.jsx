@@ -232,7 +232,7 @@ export function LancamentosTab({
                 <div className="mono" style={{ textAlign: "right", fontSize: 12.5, color: PALETTE.textMuted }}>
                   {e.quantidade}
                 </div>
-                <div className="mono" style={{ textAlign: "right", fontWeight: 600 }}>
+                <div className="mono" style={{ textAlign: "right", fontWeight: 600, color: e.valorInvestido < 0 ? PALETTE.crimson : PALETTE.textPrimary }}>
                   {formatBRL(e.valorInvestido)}
                 </div>
                 <div
@@ -246,7 +246,7 @@ export function LancamentosTab({
                   {e.rentabilidade >= 0 ? "+" : ""}
                   {e.rentabilidade.toFixed(2)}%
                 </div>
-                <div className="mono" style={{ textAlign: "right", fontSize: 12.5, color: PALETTE.textMuted }}>
+                <div className="mono" style={{ textAlign: "right", fontSize: 12.5, color: e.valorReinvestido < 0 ? PALETTE.crimson : PALETTE.textMuted }}>
                   {formatBRL(e.valorReinvestido)}
                 </div>
                 <div
