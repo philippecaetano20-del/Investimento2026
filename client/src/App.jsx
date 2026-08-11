@@ -241,7 +241,7 @@ function Dashboard({ user, onLogout }) {
   const porMes = useMemo(() => {
     const map = {};
     entries
-      .filter((e) => e.valorInvestido > 0)
+      .filter((e) => e.valorInvestido !== 0)
       .forEach((e) => {
         const key = e.data.slice(0, 7);
         map[key] = (map[key] || 0) + e.valorInvestido;
