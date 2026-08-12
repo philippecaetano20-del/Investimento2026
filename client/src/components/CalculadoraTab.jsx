@@ -170,7 +170,7 @@ function CalculadoraAcoes() {
         const existe = rs.findIndex((r) => r.ticker === novaLinha.ticker);
         if (existe >= 0) {
           const copia = [...rs];
-          copia[existe] = { ...copia[existe], preco, nome: novaLinha.nome };
+          copia[existe] = { ...copia[existe], preco, nome: novaLinha.nome, divAnual, lpa: novaLinha.lpa, vpa: novaLinha.vpa };
           return copia;
         }
         return [...rs, novaLinha];
@@ -196,10 +196,9 @@ function CalculadoraAcoes() {
       rows.map((r) => {
         const tetoBazin = r.yieldDesejado > 0 ? r.divAnual / (r.yieldDesejado / 100) : null;
         const tetoGraham = r.lpa > 0 && r.vpa > 0 ? Math.sqrt(22.5 * r.lpa * r.vpa) : null;
-        const validos = [tetoBazin, tetoGraham].filter((v) => v != null && v > 0);
-        const tetoConservador = validos.length ? Math.min(...validos) : null;
-        const margem = tetoConservador != null && r.preco > 0 ? ((tetoConservador - r.preco) / r.preco) * 100 : null;
-        return { ...r, tetoBazin, tetoGraham, margem };
+        const margemBazin = tetoBazin != null && r.preco > 0 ? ((tetoBazin - r.preco) / r.preco) * 100 : null;
+        const margemGraham = tetoGraham != null && r.preco > 0 ? ((tetoGraham - r.preco) / r.preco) * 100 : null;
+        return { ...r, tetoBazin, tetoGraham, margemBazin, margemGraham };
       }),
     [rows]
   );
@@ -212,7 +211,8 @@ function CalculadoraAcoes() {
             Ações — Bazin &amp; Graham
           </div>
           <div style={{ fontSize: 11.5, color: PALETTE.textMuted, marginTop: 2 }}>
-            Bazin: Dividendo Anual ÷ Yield desejado. Graham: √(22,5 × LPA × VPA). Margem usa o menor teto entre os dois.
+            Bazin: Dividendos por ação nos últimos 12 meses ÷ Yield desejado (padrão 6%). Graham: √(22,5 × LPA × VPA).
+            Preço, dividendo, LPA e VPA podem ser ajustados manualmente caso a cotação esteja desatualizada.
           </div>
         </div>
       </div>
@@ -238,7 +238,7 @@ function CalculadoraAcoes() {
         </div>
       ) : (
         <div style={{ overflowX: "auto", borderRadius: 8, border: `1px solid ${PALETTE.line}` }}>
-          <table style={{ width: "100%", minWidth: 920, borderCollapse: "collapse" }}>
+          <table style={{ width: "100%", minWidth: 1150, borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: PALETTE.surfaceAlt, borderBottom: `1px solid ${PALETTE.line}` }}>
                 <th style={thStyle("left")}>Ação</th>
@@ -248,8 +248,9 @@ function CalculadoraAcoes() {
                 <th style={thStyle("right")}>LPA</th>
                 <th style={thStyle("right")}>VPA</th>
                 <th style={{ ...thStyle("right"), color: PALETTE.gold }}>Teto Bazin</th>
+                <th style={thStyle("right")}>Margem Bazin</th>
                 <th style={{ ...thStyle("right"), color: PALETTE.gold }}>Teto Graham</th>
-                <th style={thStyle("right")}>Margem</th>
+                <th style={thStyle("right")}>Margem Graham</th>
                 <th style={thStyle("center")}></th>
               </tr>
             </thead>
@@ -264,11 +265,13 @@ function CalculadoraAcoes() {
                       {r.nome}
                     </div>
                   </td>
-                  <td style={tdStyle("right")} className="mono">
-                    {formatBRL(r.preco)}
-                    <button onClick={() => buscarEAdicionar(r.ticker)} title="Atualizar cotação" style={{ background: "transparent", border: "none", cursor: "pointer", verticalAlign: "middle", marginLeft: 4 }}>
-                      <RefreshCw size={11} color={PALETTE.textMuted} />
-                    </button>
+                  <td style={tdStyle("right")}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <input style={numInputStyle} type="number" step="0.01" value={r.preco} onChange={(e) => atualizarCampo(r.ticker, "preco", Number(e.target.value))} />
+                      <button onClick={() => buscarEAdicionar(r.ticker)} title="Atualizar cotação e fundamentos" style={{ background: "transparent", border: "none", cursor: "pointer", flexShrink: 0 }}>
+                        <RefreshCw size={11} color={PALETTE.textMuted} />
+                      </button>
+                    </div>
                   </td>
                   <td style={tdStyle("right")}>
                     <input style={numInputStyle} type="number" step="0.01" value={r.divAnual} onChange={(e) => atualizarCampo(r.ticker, "divAnual", Number(e.target.value))} />
@@ -285,10 +288,11 @@ function CalculadoraAcoes() {
                   <td style={tdStyle("right", { background: "rgba(212,169,79,0.08)" })} className="mono">
                     {r.tetoBazin != null ? formatBRL(r.tetoBazin) : "—"}
                   </td>
+                  <td style={tdStyle("right")}>{margemBadge(r.margemBazin)}</td>
                   <td style={tdStyle("right", { background: "rgba(212,169,79,0.08)" })} className="mono">
                     {r.tetoGraham != null ? formatBRL(r.tetoGraham) : "não aplicável"}
                   </td>
-                  <td style={tdStyle("right")}>{margemBadge(r.margem)}</td>
+                  <td style={tdStyle("right")}>{margemBadge(r.margemGraham)}</td>
                   <td style={tdStyle("center")}>
                     <button onClick={() => remover(r.ticker)} style={{ background: "transparent", border: "none", cursor: "pointer", padding: 4 }} aria-label="Remover">
                       <Trash2 size={14} color={PALETTE.crimson} />
