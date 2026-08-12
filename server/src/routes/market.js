@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getFiiRanking } from "../services/fundamentus.js";
+import { getFiiRanking, getAcaoFundamentus } from "../services/fundamentus.js";
 import { getTaxasTesouro } from "../services/tesouro.js";
 
 const router = Router();
@@ -75,6 +75,30 @@ router.get(
   ah(async (req, res) => {
     const ticker = String(req.params.ticker || "").trim().toUpperCase();
     if (!ticker) return res.status(400).json({ error: "Informe o ticker." });
+
+    try {
+      const acao = await getAcaoFundamentus(ticker);
+      if (acao && (acao.lpa != null || acao.vpa != null)) {
+        let precoAtual = acao.cotacao;
+        try {
+          const quote = await fetchQuote(ticker, { range: "5d" });
+          if (quote.regularMarketPrice != null) precoAtual = quote.regularMarketPrice;
+        } catch {
+          /* mantém a cotação do Fundamentus se o brapi falhar */
+        }
+        return res.json({
+          symbol: acao.ticker,
+          longName: acao.nome,
+          regularMarketPrice: precoAtual,
+          lpa: acao.lpa,
+          vpa: acao.vpa,
+          dividendYield: acao.dividendYield,
+          fundamentalsAvailable: true,
+        });
+      }
+    } catch {
+      /* Fundamentus indisponível: cai para o brapi abaixo */
+    }
 
     const params = withToken(new URLSearchParams({ modules: "defaultKeyStatistics" }));
     const r = await fetch(`${BRAPI_BASE}/quote/${encodeURIComponent(ticker)}?${params.toString()}`);
