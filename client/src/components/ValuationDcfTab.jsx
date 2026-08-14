@@ -61,6 +61,83 @@ const addBtnStyle = {
   cursor: "pointer",
 };
 
+const fieldWrapStyle = { position: "relative" };
+const affixStyle = {
+  position: "absolute",
+  top: "50%",
+  transform: "translateY(-50%)",
+  fontSize: 12,
+  color: PALETTE.textMuted,
+  fontFamily: "'IBM Plex Mono', monospace",
+  pointerEvents: "none",
+};
+
+function formatInt(n) {
+  const v = Number(n) || 0;
+  return v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
+}
+
+function parseDigits(str) {
+  const digits = String(str).replace(/\D/g, "");
+  return digits ? parseInt(digits, 10) : 0;
+}
+
+function formatCents(n) {
+  const v = Number(n) || 0;
+  return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function parseCents(str) {
+  const digits = String(str).replace(/\D/g, "");
+  return digits ? parseInt(digits, 10) / 100 : 0;
+}
+
+function IntegerField({ value, onChange, prefix }) {
+  return (
+    <div style={fieldWrapStyle}>
+      {prefix && <span style={{ ...affixStyle, left: 9 }}>{prefix}</span>}
+      <input
+        type="text"
+        inputMode="numeric"
+        style={{ ...inputStyle, paddingLeft: prefix ? 28 : 9 }}
+        value={value ? formatInt(value) : ""}
+        onChange={(e) => onChange(parseDigits(e.target.value))}
+        placeholder="0"
+      />
+    </div>
+  );
+}
+
+function PriceField({ value, onChange }) {
+  return (
+    <div style={fieldWrapStyle}>
+      <span style={{ ...affixStyle, left: 9 }}>R$</span>
+      <input
+        type="text"
+        inputMode="numeric"
+        style={{ ...inputStyle, paddingLeft: 28 }}
+        value={formatCents(value)}
+        onChange={(e) => onChange(parseCents(e.target.value))}
+      />
+    </div>
+  );
+}
+
+function PercentField({ value, onChange }) {
+  return (
+    <div style={fieldWrapStyle}>
+      <input
+        type="number"
+        step="0.01"
+        style={{ ...inputStyle, paddingRight: 22 }}
+        value={value === 0 ? "" : value}
+        onChange={(e) => onChange(Number(e.target.value))}
+      />
+      <span style={{ ...affixStyle, right: 9 }}>%</span>
+    </div>
+  );
+}
+
 function fieldLabel(text, extra) {
   return (
     <div style={{ fontSize: 10, fontFamily: "'Manrope', sans-serif", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: PALETTE.textMuted, marginBottom: 4, ...extra }}>
@@ -258,7 +335,9 @@ export function ValuationDcfTab() {
                 <div>
                   {fieldLabel("Preço Atual")}
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <input style={inputStyle} type="number" step="0.01" value={r.preco} onChange={(e) => atualizarCampo(r.ticker, "preco", Number(e.target.value))} />
+                    <div style={{ flex: 1 }}>
+                      <PriceField value={r.preco} onChange={(v) => atualizarCampo(r.ticker, "preco", v)} />
+                    </div>
                     <button onClick={() => buscarEAdicionar(r.ticker)} title="Atualizar cotação" style={{ background: "transparent", border: "none", cursor: "pointer", flexShrink: 0 }}>
                       <RefreshCw size={11} color={PALETTE.textMuted} />
                     </button>
@@ -266,23 +345,23 @@ export function ValuationDcfTab() {
                 </div>
                 <div>
                   {fieldLabel("Nº Ações (ex-tesouraria)")}
-                  <input style={inputStyle} type="number" step="1" value={r.numAcoes} onChange={(e) => atualizarCampo(r.ticker, "numAcoes", Number(e.target.value))} />
+                  <IntegerField value={r.numAcoes} onChange={(v) => atualizarCampo(r.ticker, "numAcoes", v)} />
                 </div>
                 <div>
                   {fieldLabel("Lucro Líquido Atual")}
-                  <input style={inputStyle} type="number" step="1000000" value={r.lucroAtual} onChange={(e) => atualizarCampo(r.ticker, "lucroAtual", Number(e.target.value))} />
+                  <IntegerField prefix="R$" value={r.lucroAtual} onChange={(v) => atualizarCampo(r.ticker, "lucroAtual", v)} />
                 </div>
                 <div>
                   {fieldLabel("Payout Médio %")}
-                  <input style={inputStyle} type="number" step="0.1" value={r.payout} onChange={(e) => atualizarCampo(r.ticker, "payout", Number(e.target.value))} />
+                  <PercentField value={r.payout} onChange={(v) => atualizarCampo(r.ticker, "payout", v)} />
                 </div>
                 <div>
                   {fieldLabel("ROE %")}
-                  <input style={inputStyle} type="number" step="0.1" value={r.roe} onChange={(e) => atualizarCampo(r.ticker, "roe", Number(e.target.value))} />
+                  <PercentField value={r.roe} onChange={(v) => atualizarCampo(r.ticker, "roe", v)} />
                 </div>
                 <div>
                   {fieldLabel("Taxa de Desconto %")}
-                  <input style={inputStyle} type="number" step="0.1" value={r.taxaDesconto} onChange={(e) => atualizarCampo(r.ticker, "taxaDesconto", Number(e.target.value))} />
+                  <PercentField value={r.taxaDesconto} onChange={(v) => atualizarCampo(r.ticker, "taxaDesconto", v)} />
                 </div>
                 <div>
                   {fieldLabel("Anos de Projeção")}
