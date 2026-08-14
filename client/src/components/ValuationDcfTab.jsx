@@ -406,7 +406,7 @@ export function ValuationDcfTab() {
                       <th style={thStyle("left")}>Ano</th>
                       <th style={thStyle("right")}>Lucro Líquido</th>
                       <th style={thStyle("right")}>Crescimento</th>
-                      <th style={{ ...thStyle("right"), color: PALETTE.gold }}>VPL</th>
+                      <th style={thStyle("right")}>VPL</th>
                     </tr>
                   </thead>
                   <tbody>
