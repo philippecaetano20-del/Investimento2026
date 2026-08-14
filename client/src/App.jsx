@@ -11,6 +11,7 @@ import { LancamentosTab } from "./components/LancamentosTab.jsx";
 import { AssetsManager } from "./components/AssetsManager.jsx";
 import { MercadoTab } from "./components/MercadoTab.jsx";
 import { CalculadoraTab } from "./components/CalculadoraTab.jsx";
+import { ValuationDcfTab } from "./components/ValuationDcfTab.jsx";
 import { LoginPage } from "./components/LoginPage.jsx";
 import { AcceptInvitePage } from "./components/AcceptInvitePage.jsx";
 
@@ -415,6 +416,9 @@ function Dashboard({ user, onLogout }) {
           <TabButton active={activeTab === "calculadora"} onClick={() => setActiveTab("calculadora")}>
             Calculadora
           </TabButton>
+          <TabButton active={activeTab === "valuation"} onClick={() => setActiveTab("valuation")}>
+            Valuation de Fluxo de Caixa
+          </TabButton>
         </div>
 
         <div className="reveal reveal-3">
@@ -434,6 +438,8 @@ function Dashboard({ user, onLogout }) {
           <MercadoTab ativosList={ativosList} />
         ) : activeTab === "calculadora" ? (
           <CalculadoraTab />
+        ) : activeTab === "valuation" ? (
+          <ValuationDcfTab />
         ) : activeTab === "lancamentos" ? (
           <LancamentosTab
             sortedEntries={sortedEntries}
