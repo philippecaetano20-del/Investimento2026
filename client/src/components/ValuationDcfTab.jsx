@@ -366,7 +366,7 @@ export function ValuationDcfTab() {
                   <PercentField value={r.taxaDesconto} onChange={(v) => atualizarCampo(r.ticker, "taxaDesconto", v)} />
                 </div>
                 <div>
-                  {fieldLabel("Taxa de Crescimento na Perpetuidade %")}
+                  {fieldLabel("Taxa de Crescimento %")}
                   <PercentField value={r.taxaPerpetuidade} onChange={(v) => atualizarCampo(r.ticker, "taxaPerpetuidade", v)} />
                 </div>
                 <div>
