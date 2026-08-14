@@ -225,6 +225,7 @@ export function ValuationDcfTab() {
             payout: 30,
             roe: 15,
             taxaDesconto: 20,
+            taxaPerpetuidade: 3,
             anos: 5,
           },
         ];
@@ -251,6 +252,7 @@ export function ValuationDcfTab() {
         const roe = Number(r.roe) || 0;
         const payout = Number(r.payout) || 0;
         const taxaDesconto = Number(r.taxaDesconto) || 0;
+        const taxaPerpetuidade = r.taxaPerpetuidade != null ? Number(r.taxaPerpetuidade) : 3;
         const lucroAtual = Number(r.lucroAtual) || 0;
         const numAcoes = Number(r.numAcoes) || 0;
         const g = roe * (1 - payout / 100);
@@ -267,16 +269,16 @@ export function ValuationDcfTab() {
           lucroAnterior = lucro;
         }
 
-        const podeCalcularTerminal = taxaDesconto > g;
-        const lucroTerminalBase = lucroAnterior * (1 + g / 100);
-        const valorTerminal = podeCalcularTerminal ? lucroTerminalBase / ((taxaDesconto - g) / 100) : null;
+        const podeCalcularTerminal = taxaDesconto > taxaPerpetuidade;
+        const lucroTerminalBase = lucroAnterior * (1 + taxaPerpetuidade / 100);
+        const valorTerminal = podeCalcularTerminal ? lucroTerminalBase / ((taxaDesconto - taxaPerpetuidade) / 100) : null;
         const vpTerminal = podeCalcularTerminal ? valorTerminal / Math.pow(1 + taxaDesconto / 100, r.anos) : null;
 
         const valorEmpresa = somaVpl + (vpTerminal || 0);
         const precoJusto = numAcoes > 0 ? valorEmpresa / numAcoes : null;
         const upside = precoJusto != null && r.preco > 0 ? ((precoJusto - r.preco) / r.preco) * 100 : null;
 
-        return { ...r, g, anosProjetados, somaVpl, vpTerminal, valorEmpresa, precoJusto, upside, podeCalcularTerminal };
+        return { ...r, g, taxaPerpetuidade, anosProjetados, somaVpl, vpTerminal, valorEmpresa, precoJusto, upside, podeCalcularTerminal };
       }),
     [rows]
   );
@@ -288,8 +290,8 @@ export function ValuationDcfTab() {
       </div>
       <div style={{ fontSize: 12.5, color: PALETTE.textMuted, marginBottom: 24, maxWidth: 780 }}>
         Projeta o Lucro Líquido a partir da Taxa Esperada de Crescimento (ROE × (1 − Payout)), traz cada ano a valor
-        presente e soma um valor terminal (perpetuidade de Gordon) para estimar o valor justo da empresa e o preço
-        justo por ação.
+        presente e soma um valor terminal (perpetuidade de Gordon), calculado com uma Taxa de Crescimento na
+        Perpetuidade separada e mais conservadora, para estimar o valor justo da empresa e o preço justo por ação.
         {tesouro?.selicMeta != null && <> Selic (meta atual): {tesouro.selicMeta}%.</>}
       </div>
 
@@ -364,6 +366,10 @@ export function ValuationDcfTab() {
                   <PercentField value={r.taxaDesconto} onChange={(v) => atualizarCampo(r.ticker, "taxaDesconto", v)} />
                 </div>
                 <div>
+                  {fieldLabel("Taxa de Crescimento na Perpetuidade %")}
+                  <PercentField value={r.taxaPerpetuidade} onChange={(v) => atualizarCampo(r.ticker, "taxaPerpetuidade", v)} />
+                </div>
+                <div>
                   {fieldLabel("Anos de Projeção")}
                   <div style={{ display: "flex", gap: 4 }}>
                     {[3, 5].map((n) => (
@@ -393,9 +399,12 @@ export function ValuationDcfTab() {
                 Taxa Esperada de Crescimento (g) = ROE × (1 − Payout) ={" "}
                 <span className="mono" style={{ color: PALETTE.gold, fontWeight: 700 }}>
                   {r.g.toFixed(2)}%
-                </span>
+                </span>{" "}
+                — usada só nos anos projetados. O valor terminal usa a Taxa de Crescimento na Perpetuidade (
+                {r.taxaPerpetuidade.toFixed(2)}%), mais conservadora, já que nenhuma empresa sustenta o crescimento de
+                curto prazo para sempre.
                 {!r.podeCalcularTerminal && (
-                  <span style={{ color: PALETTE.crimson }}> — taxa de desconto precisa ser maior que g para calcular o valor terminal.</span>
+                  <span style={{ color: PALETTE.crimson }}> A taxa de desconto precisa ser maior que a taxa de perpetuidade para calcular o valor terminal.</span>
                 )}
               </div>
 
