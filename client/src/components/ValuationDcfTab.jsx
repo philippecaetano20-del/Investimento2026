@@ -421,7 +421,7 @@ export function ValuationDcfTab() {
                         <td style={tdStyle("right")} className="mono">
                           {a.crescimento.toFixed(2)}%
                         </td>
-                        <td style={tdStyle("right", { background: "rgba(212,169,79,0.08)" })} className="mono">
+                        <td style={tdStyle("right")} className="mono">
                           {a.vpl != null ? formatBRL(a.vpl) : "—"}
                         </td>
                       </tr>
