@@ -4,7 +4,7 @@ import { PALETTE, TIPOS } from "../constants.js";
 import { parseNumBR } from "../utils.js";
 import { AssetSelect } from "./AssetSelect.jsx";
 
-export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, ativosList }) {
+export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, ativosList, saving }) {
   function set(field) {
     return (e) => setForm({ ...form, [field]: e.target.value });
   }
@@ -172,9 +172,21 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
             <button
               type="button"
               onClick={onSubmit}
-              style={{ background: PALETTE.gold, color: "#1A1406", border: "none", borderRadius: 6, padding: "8px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "Manrope, sans-serif" }}
+              disabled={saving}
+              style={{
+                background: PALETTE.gold,
+                color: "#1A1406",
+                border: "none",
+                borderRadius: 6,
+                padding: "8px 16px",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: saving ? "default" : "pointer",
+                fontFamily: "Manrope, sans-serif",
+                opacity: saving ? 0.7 : 1,
+              }}
             >
-              {isEdit ? "Salvar alterações" : "Adicionar"}
+              {saving ? "Salvando..." : isEdit ? "Salvar alterações" : "Adicionar"}
             </button>
           </div>
         </div>

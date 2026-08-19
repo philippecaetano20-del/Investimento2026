@@ -10,8 +10,11 @@ const iconBtnStyle = {
   background: "transparent",
   border: "none",
   cursor: "pointer",
-  padding: 4,
+  padding: 8,
   display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: 6,
 };
 
 const COLUNAS_EXTRATO = [
@@ -38,6 +41,7 @@ export function LancamentosTab({
   form,
   setForm,
   handleSubmit,
+  saving,
   closeForm,
   error,
   ativosList,
@@ -137,6 +141,7 @@ export function LancamentosTab({
           error={error}
           isEdit={!!form.id}
           ativosList={ativosList}
+          saving={saving}
         />
       )}
 

@@ -328,7 +328,7 @@ export function ValuationDcfTab() {
                   </div>
                   <div style={{ fontSize: 11.5, color: PALETTE.textMuted }}>{r.nome}</div>
                 </div>
-                <button onClick={() => remover(r.ticker)} style={{ background: "transparent", border: "none", cursor: "pointer", padding: 4 }} aria-label="Remover">
+                <button onClick={() => remover(r.ticker)} style={{ background: "transparent", border: "none", cursor: "pointer", padding: 9, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }} aria-label="Remover">
                   <Trash2 size={15} color={PALETTE.crimson} />
                 </button>
               </div>

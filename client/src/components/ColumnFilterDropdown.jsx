@@ -59,7 +59,7 @@ export function ColumnFilterDropdown({ options, format, selectedSet, onApply }) 
       <button
         ref={btnRef}
         onClick={() => setOpen((o) => !o)}
-        style={{ background: "transparent", border: "none", cursor: "pointer", padding: 2, display: "flex" }}
+        style={{ background: "transparent", border: "none", cursor: "pointer", padding: 6, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5 }}
         aria-label="Filtrar"
       >
         <Filter size={11} color={ativo ? PALETTE.gold : PALETTE.textMuted} />

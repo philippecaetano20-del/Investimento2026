@@ -9,9 +9,12 @@ const iconBtnStyle = {
   background: "transparent",
   border: "none",
   cursor: "pointer",
-  padding: 2,
+  padding: 8,
   display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
   flexShrink: 0,
+  borderRadius: 6,
 };
 
 export function MetaAnualCard({ ano, investidoAno, meta, onSaveMeta }) {

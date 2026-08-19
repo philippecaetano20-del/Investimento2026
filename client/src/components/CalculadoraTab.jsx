@@ -294,7 +294,7 @@ function CalculadoraAcoes() {
                   </td>
                   <td style={tdStyle("right")}>{margemBadge(r.margemGraham)}</td>
                   <td style={tdStyle("center")}>
-                    <button onClick={() => remover(r.ticker)} style={{ background: "transparent", border: "none", cursor: "pointer", padding: 4 }} aria-label="Remover">
+                    <button onClick={() => remover(r.ticker)} style={{ background: "transparent", border: "none", cursor: "pointer", padding: 9, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }} aria-label="Remover">
                       <Trash2 size={14} color={PALETTE.crimson} />
                     </button>
                   </td>
@@ -480,7 +480,7 @@ function CalculadoraFiis({ ranking }) {
                   </td>
                   <td style={tdStyle("right")}>{margemBadge(r.margem)}</td>
                   <td style={tdStyle("center")}>
-                    <button onClick={() => remover(r.ticker)} style={{ background: "transparent", border: "none", cursor: "pointer", padding: 4 }} aria-label="Remover">
+                    <button onClick={() => remover(r.ticker)} style={{ background: "transparent", border: "none", cursor: "pointer", padding: 9, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }} aria-label="Remover">
                       <Trash2 size={14} color={PALETTE.crimson} />
                     </button>
                   </td>
@@ -741,7 +741,7 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
                   </td>
                   <td style={tdStyle("right")}>{margemBadge(r.margem)}</td>
                   <td style={tdStyle("center")}>
-                    <button onClick={() => remover(r.ticker)} style={{ background: "transparent", border: "none", cursor: "pointer", padding: 4 }} aria-label="Remover">
+                    <button onClick={() => remover(r.ticker)} style={{ background: "transparent", border: "none", cursor: "pointer", padding: 9, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }} aria-label="Remover">
                       <Trash2 size={14} color={PALETTE.crimson} />
                     </button>
                   </td>

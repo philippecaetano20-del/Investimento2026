@@ -68,6 +68,7 @@ function Dashboard({ user, onLogout }) {
   const [form, setForm] = useState(emptyForm());
   const [error, setError] = useState("");
   const [saveError, setSaveError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [meta, setMeta] = useState(0);
   const [anoSelecionado, setAnoSelecionado] = useState(String(new Date().getFullYear()));
 
@@ -147,6 +148,7 @@ function Dashboard({ user, onLogout }) {
   }
 
   async function handleSubmit() {
+    if (saving) return;
     if (!form.nivel.trim()) {
       setError("Informe o ativo (ex: BBSE3, CPTS11).");
       return;
@@ -176,6 +178,7 @@ function Dashboard({ user, onLogout }) {
       estaReinvestido: form.estaReinvestido === "Sim",
     };
 
+    setSaving(true);
     try {
       if (form.id) {
         const updated = await api.updateEntry(form.id, cleaned);
@@ -188,6 +191,8 @@ function Dashboard({ user, onLogout }) {
       setFormOpen(false);
     } catch (e) {
       setError(e.message || "Não foi possível salvar o lançamento.");
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -340,6 +345,12 @@ function Dashboard({ user, onLogout }) {
           border-color: ${PALETTE.gold} !important;
           box-shadow: 0 0 0 3px rgba(212, 169, 79, 0.15);
         }
+
+        button:focus-visible, a:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(212, 169, 79, 0.35);
+          border-radius: 6px;
+        }
       `}</style>
 
       <div className="grain-overlay" />
@@ -463,6 +474,7 @@ function Dashboard({ user, onLogout }) {
             form={form}
             setForm={setForm}
             handleSubmit={handleSubmit}
+            saving={saving}
             closeForm={closeForm}
             error={error}
             ativosList={ativosList}
