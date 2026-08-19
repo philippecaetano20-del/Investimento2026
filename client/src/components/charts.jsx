@@ -42,13 +42,13 @@ export function Bar3DLabel(colors) {
     const { x, y, width, value, index } = props;
     if (value === undefined || value === null) return null;
     const text = formatBRL(value);
-    const boxWidth = Math.max(58, text.length * 6.6 + 18);
-    const boxHeight = 22;
+    const boxWidth = Math.max(60, text.length * 6.4 + 18);
+    const boxHeight = 23;
     const w = width * 0.62;
     const depth = Math.min(16, width * 0.3);
     const cx = Math.round(x + (width - w - depth) / 2 + w / 2 + depth / 2);
     const bx = Math.round(cx - boxWidth / 2);
-    const by = Math.round(y - depth - boxHeight - 12);
+    const by = Math.round(y - depth - boxHeight - 9);
     const color = colors[index % colors.length];
     return (
       <g>
@@ -63,25 +63,22 @@ export function Bar3DLabel(colors) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: "#F7F5EF",
-              border: `1.4px solid ${color}`,
-              borderRadius: 4,
+              background: "linear-gradient(180deg, #202C46 0%, #182234 100%)",
+              border: "1px solid rgba(255,255,255,0.09)",
+              borderTop: `2px solid ${color}`,
+              borderRadius: 6,
+              boxShadow: "0 6px 14px -6px rgba(0,0,0,0.65)",
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 12,
-              fontWeight: 700,
-              color: "#1A2333",
+              fontSize: 11.5,
+              fontWeight: 600,
+              letterSpacing: "0.01em",
+              color: "#EDEFF4",
               whiteSpace: "nowrap",
             }}
           >
             {text}
           </div>
         </foreignObject>
-        <polygon
-          points={`${cx - 5},${by + boxHeight - 1} ${cx + 5},${by + boxHeight - 1} ${cx},${by + boxHeight + 7}`}
-          fill="#F7F5EF"
-          stroke={color}
-          strokeWidth={1.4}
-        />
       </g>
     );
   };
