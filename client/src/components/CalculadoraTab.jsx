@@ -268,7 +268,12 @@ function CalculadoraAcoes() {
                   <td style={tdStyle("right")}>
                     <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                       <input style={numInputStyle} type="number" step="0.01" value={r.preco} onChange={(e) => atualizarCampo(r.ticker, "preco", Number(e.target.value))} />
-                      <button onClick={() => buscarEAdicionar(r.ticker)} title="Atualizar cotação e fundamentos" style={{ background: "transparent", border: "none", cursor: "pointer", flexShrink: 0 }}>
+                      <button
+                        onClick={() => buscarEAdicionar(r.ticker)}
+                        title="Atualizar cotação e fundamentos"
+                        aria-label={`Atualizar cotação e fundamentos de ${r.ticker}`}
+                        style={{ background: "transparent", border: "none", cursor: "pointer", flexShrink: 0, padding: 6, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5 }}
+                      >
                         <RefreshCw size={11} color={PALETTE.textMuted} />
                       </button>
                     </div>

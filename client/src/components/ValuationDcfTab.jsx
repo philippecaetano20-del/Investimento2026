@@ -340,7 +340,12 @@ export function ValuationDcfTab() {
                     <div style={{ flex: 1 }}>
                       <PriceField value={r.preco} onChange={(v) => atualizarCampo(r.ticker, "preco", v)} />
                     </div>
-                    <button onClick={() => buscarEAdicionar(r.ticker)} title="Atualizar cotação" style={{ background: "transparent", border: "none", cursor: "pointer", flexShrink: 0 }}>
+                    <button
+                      onClick={() => buscarEAdicionar(r.ticker)}
+                      title="Atualizar cotação"
+                      aria-label={`Atualizar cotação de ${r.ticker}`}
+                      style={{ background: "transparent", border: "none", cursor: "pointer", flexShrink: 0, padding: 6, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5 }}
+                    >
                       <RefreshCw size={11} color={PALETTE.textMuted} />
                     </button>
                   </div>

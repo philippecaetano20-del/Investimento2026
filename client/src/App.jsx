@@ -300,7 +300,11 @@ function Dashboard({ user, onLogout }) {
         .display { font-family: 'Fraunces', serif; }
         input, select { font-family: 'IBM Plex Mono', monospace; }
         ::placeholder { color: #5C6884; }
+        .row-actions { opacity: 0.5; }
         .ledger-row:hover .row-actions { opacity: 1; }
+        @media (hover: none) {
+          .row-actions { opacity: 1; }
+        }
 
         .grain-overlay {
           position: fixed;

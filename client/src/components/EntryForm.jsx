@@ -86,16 +86,17 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
         <div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 14 }}>
             <div>
-              <label style={label}>Classe</label>
-              <select style={input} value={form.tipo} onChange={set("tipo")}>
+              <label style={label} htmlFor="entry-tipo">Classe</label>
+              <select id="entry-tipo" style={input} value={form.tipo} onChange={set("tipo")}>
                 {TIPOS.map((t) => (
                   <option key={t} value={t}>{t}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label style={label}>Ativo</label>
+              <label style={label} htmlFor="entry-nivel">Ativo</label>
               <AssetSelect
+                id="entry-nivel"
                 value={form.nivel}
                 onChange={(v) => setForm({ ...form, nivel: v })}
                 options={ativosList}
@@ -103,14 +104,14 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
               />
             </div>
             <div>
-              <label style={label}>Data</label>
-              <input type="date" style={input} value={form.data} onChange={set("data")} />
+              <label style={label} htmlFor="entry-data">Data</label>
+              <input id="entry-data" type="date" style={input} value={form.data} onChange={set("data")} />
             </div>
             <div>
-              <label style={label}>Valor Pago</label>
+              <label style={label} htmlFor="entry-valor-pago">Valor Pago</label>
               <div style={moneyInputWrap}>
                 <span style={moneyPrefix}>R$</span>
-                <input type="text" inputMode="decimal" style={moneyInput} value={form.valorPago} onChange={set("valorPago")} placeholder="0,00" />
+                <input id="entry-valor-pago" type="text" inputMode="decimal" style={moneyInput} value={form.valorPago} onChange={set("valorPago")} placeholder="0,00" />
               </div>
               {isRendaFixa && (
                 <div style={{ fontSize: 10.5, color: PALETTE.textMuted, marginTop: 4 }}>
@@ -120,22 +121,23 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
             </div>
             {!isRendaFixa && (
               <div>
-                <label style={label}>Quantidade</label>
-                <input type="text" inputMode="decimal" style={input} value={form.quantidade} onChange={set("quantidade")} placeholder="0" />
+                <label style={label} htmlFor="entry-quantidade">Quantidade</label>
+                <input id="entry-quantidade" type="text" inputMode="decimal" style={input} value={form.quantidade} onChange={set("quantidade")} placeholder="0" />
               </div>
             )}
             <div>
-              <label style={label}>Está Reinvestido?</label>
-              <select style={input} value={form.estaReinvestido || "Não"} onChange={set("estaReinvestido")}>
+              <label style={label} htmlFor="entry-reinvestido">Está Reinvestido?</label>
+              <select id="entry-reinvestido" style={input} value={form.estaReinvestido || "Não"} onChange={set("estaReinvestido")}>
                 <option value="Não">Não</option>
                 <option value="Sim">Sim</option>
               </select>
             </div>
             <div>
-              <label style={label}>Valor Investido</label>
+              <label style={label} htmlFor="entry-valor-investido">Valor Investido</label>
               <div style={moneyInputWrap}>
                 <span style={moneyPrefix}>R$</span>
                 <input
+                  id="entry-valor-investido"
                   type="text"
                   readOnly
                   style={readonlyMoneyStyle(valorInvestidoExibido)}
@@ -144,14 +146,15 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
               </div>
             </div>
             <div>
-              <label style={label}>Rentabilidade</label>
-              <input type="text" inputMode="decimal" style={input} value={form.rentabilidade} onChange={set("rentabilidade")} placeholder="0,00" />
+              <label style={label} htmlFor="entry-rentabilidade">Rentabilidade</label>
+              <input id="entry-rentabilidade" type="text" inputMode="decimal" style={input} value={form.rentabilidade} onChange={set("rentabilidade")} placeholder="0,00" />
             </div>
             <div>
-              <label style={label}>Valor Investido/Reinvestido</label>
+              <label style={label} htmlFor="entry-valor-reinvestido">Valor Investido/Reinvestido</label>
               <div style={moneyInputWrap}>
                 <span style={moneyPrefix}>R$</span>
                 <input
+                  id="entry-valor-reinvestido"
                   type="text"
                   readOnly
                   style={readonlyMoneyStyle(calculado)}

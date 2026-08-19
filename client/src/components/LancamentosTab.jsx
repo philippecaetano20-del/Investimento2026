@@ -260,7 +260,6 @@ export function LancamentosTab({
                     display: "flex",
                     gap: 6,
                     justifyContent: "flex-end",
-                    opacity: 0.5,
                     transition: "opacity 0.15s",
                   }}
                 >

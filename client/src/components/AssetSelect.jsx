@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { PALETTE } from "../constants.js";
 
-export function AssetSelect({ value, onChange, options, inputStyle }) {
+export function AssetSelect({ value, onChange, options, inputStyle, id }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState(value || "");
 
@@ -20,6 +20,7 @@ export function AssetSelect({ value, onChange, options, inputStyle }) {
   return (
     <div style={{ position: "relative" }}>
       <input
+        id={id}
         style={inputStyle}
         value={query}
         placeholder="Buscar ativo..."
