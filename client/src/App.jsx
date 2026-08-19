@@ -69,20 +69,15 @@ function Dashboard({ user, onLogout }) {
   const [error, setError] = useState("");
   const [saveError, setSaveError] = useState("");
   const [meta, setMeta] = useState(0);
+  const [anoSelecionado, setAnoSelecionado] = useState(String(new Date().getFullYear()));
 
   useEffect(() => {
     const slowTimer = setTimeout(() => setSlowLoading(true), 4000);
     (async () => {
       try {
-        const anoAtual = new Date().getFullYear();
-        const [entriesData, ativosData, metaData] = await Promise.all([
-          api.listEntries(),
-          api.listAtivos(),
-          api.getMeta(anoAtual),
-        ]);
+        const [entriesData, ativosData] = await Promise.all([api.listEntries(), api.listAtivos()]);
         setEntries(entriesData);
         setAtivosList(ativosData);
-        setMeta(metaData.valor);
       } catch (e) {
         setSaveError("Não foi possível carregar os dados do servidor.");
       } finally {
@@ -93,9 +88,15 @@ function Dashboard({ user, onLogout }) {
     return () => clearTimeout(slowTimer);
   }, []);
 
+  useEffect(() => {
+    api
+      .getMeta(anoSelecionado)
+      .then((data) => setMeta(data.valor))
+      .catch(() => setMeta(0));
+  }, [anoSelecionado]);
+
   async function saveMeta(valor) {
-    const anoAtual = new Date().getFullYear();
-    const data = await api.setMeta(anoAtual, valor);
+    const data = await api.setMeta(anoSelecionado, valor);
     setMeta(data.valor);
   }
 
@@ -210,23 +211,35 @@ function Dashboard({ user, onLogout }) {
     return { totalInvestido, rentMedia, ativos };
   }, [entries]);
 
+  const anosDisponiveis = useMemo(() => {
+    const anoReal = new Date().getFullYear();
+    const anos = new Set([anoReal, anoReal + 1]);
+    entries.forEach((e) => anos.add(Number(e.data.slice(0, 4))));
+    return [...anos].sort((a, b) => b - a).map(String);
+  }, [entries]);
+
+  const entriesDoAno = useMemo(
+    () => entries.filter((e) => e.data.slice(0, 4) === anoSelecionado),
+    [entries, anoSelecionado]
+  );
+
   const porTipo = useMemo(() => {
     const map = {};
-    entries.forEach((e) => {
+    entriesDoAno.forEach((e) => {
       map[e.tipo] = (map[e.tipo] || 0) + e.valorReinvestido;
     });
     return Object.entries(map).map(([name, value]) => ({ name, value }));
-  }, [entries]);
+  }, [entriesDoAno]);
 
   const porAtivo = useMemo(() => {
     const map = {};
-    entries.forEach((e) => {
+    entriesDoAno.forEach((e) => {
       map[e.nivel] = (map[e.nivel] || 0) + e.valorReinvestido;
     });
     return Object.entries(map)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
-  }, [entries]);
+  }, [entriesDoAno]);
 
   const porAno = useMemo(() => {
     const map = { ...HISTORICO_ANOS_ANTERIORES };
@@ -241,7 +254,7 @@ function Dashboard({ user, onLogout }) {
 
   const porMes = useMemo(() => {
     const map = {};
-    entries
+    entriesDoAno
       .filter((e) => e.valorInvestido !== 0)
       .forEach((e) => {
         const key = e.data.slice(0, 7);
@@ -250,10 +263,9 @@ function Dashboard({ user, onLogout }) {
     return Object.entries(map)
       .map(([key, value]) => ({ name: monthLabel(key), value, key }))
       .sort((a, b) => a.key.localeCompare(b.key));
-  }, [entries]);
+  }, [entriesDoAno]);
 
-  const anoAtual = new Date().getFullYear();
-  const investidoAnoAtual = porAno.find((d) => d.name === String(anoAtual))?.value || 0;
+  const investidoAnoSelecionado = porAno.find((d) => d.name === anoSelecionado)?.value || 0;
 
   const sortedEntries = useMemo(
     () => [...entries].sort((a, b) => (a.data < b.data ? 1 : -1)),
@@ -457,6 +469,30 @@ function Dashboard({ user, onLogout }) {
           />
         ) : (
           <>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+              <select
+                value={anoSelecionado}
+                onChange={(e) => setAnoSelecionado(e.target.value)}
+                aria-label="Ano do painel"
+                style={{
+                  background: PALETTE.surface,
+                  border: `1px solid ${PALETTE.line}`,
+                  borderRadius: 8,
+                  padding: "9px 14px",
+                  color: PALETTE.textPrimary,
+                  fontSize: 14,
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  cursor: "pointer",
+                }}
+              >
+                {anosDisponiveis.map((a) => (
+                  <option key={a} value={a}>
+                    {a}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Charts */}
             <div
               style={{
@@ -473,7 +509,7 @@ function Dashboard({ user, onLogout }) {
               <ChartCard title="Por ano" data={porAno} />
             </div>
 
-            <MetaAnualCard ano={anoAtual} investidoAno={investidoAnoAtual} meta={meta} onSaveMeta={saveMeta} />
+            <MetaAnualCard ano={anoSelecionado} investidoAno={investidoAnoSelecionado} meta={meta} onSaveMeta={saveMeta} />
           </>
         )}
         </div>
