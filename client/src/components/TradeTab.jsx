@@ -19,7 +19,7 @@ function widgetSrc(symbol) {
     withdateranges: true,
     allow_symbol_change: true,
     save_image: false,
-    studies: ["STD;SMA"],
+    studies: ["STD;SMA", "STD;Stochastic_RSI"],
     autosize: true,
   };
   return `https://www.tradingview-widget.com/embed-widget/advanced-chart/#${encodeURIComponent(JSON.stringify(config))}`;
