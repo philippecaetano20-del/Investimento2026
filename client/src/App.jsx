@@ -10,6 +10,7 @@ import { TabButton } from "./components/TabButton.jsx";
 import { LancamentosTab } from "./components/LancamentosTab.jsx";
 import { AssetsManager } from "./components/AssetsManager.jsx";
 import { MercadoTab } from "./components/MercadoTab.jsx";
+import { TradeTab } from "./components/TradeTab.jsx";
 import { CalculadoraTab } from "./components/CalculadoraTab.jsx";
 import { ValuationDcfTab } from "./components/ValuationDcfTab.jsx";
 import { LoginPage } from "./components/LoginPage.jsx";
@@ -440,6 +441,9 @@ function Dashboard({ user, onLogout }) {
           <TabButton active={activeTab === "mercado"} onClick={() => setActiveTab("mercado")}>
             Mercado
           </TabButton>
+          <TabButton active={activeTab === "trade"} onClick={() => setActiveTab("trade")}>
+            Trade
+          </TabButton>
           <TabButton active={activeTab === "calculadora"} onClick={() => setActiveTab("calculadora")}>
             Calculadora
           </TabButton>
@@ -463,6 +467,8 @@ function Dashboard({ user, onLogout }) {
           <AssetsManager ativosList={ativosList} onAdd={addAtivo} onRename={renameAtivo} onRemove={removeAtivo} />
         ) : activeTab === "mercado" ? (
           <MercadoTab ativosList={ativosList} />
+        ) : activeTab === "trade" ? (
+          <TradeTab />
         ) : activeTab === "calculadora" ? (
           <CalculadoraTab />
         ) : activeTab === "valuation" ? (
