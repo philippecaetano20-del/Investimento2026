@@ -230,7 +230,7 @@ function CalculadoraAcoes() {
           Adicionar
         </button>
       </div>
-      {error && <div style={{ color: PALETTE.crimson, fontSize: 12.5, marginBottom: 12 }}>{error}</div>}
+      {error && <div style={{ color: PALETTE.crimsonText, fontSize: 12.5, marginBottom: 12 }}>{error}</div>}
 
       {calculadas.length === 0 ? (
         <div style={{ color: PALETTE.textMuted, padding: 24, textAlign: "center", fontSize: 13 }}>
@@ -441,7 +441,7 @@ function CalculadoraFiis({ ranking }) {
           <Plus size={15} /> Adicionar
         </button>
       </div>
-      {error && <div style={{ color: PALETTE.crimson, fontSize: 12.5, marginBottom: 12 }}>{error}</div>}
+      {error && <div style={{ color: PALETTE.crimsonText, fontSize: 12.5, marginBottom: 12 }}>{error}</div>}
 
       {calculadas.length === 0 ? (
         <div style={{ color: PALETTE.textMuted, padding: 24, textAlign: "center", fontSize: 13 }}>
@@ -658,7 +658,7 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
           <Plus size={15} /> Adicionar
         </button>
       </div>
-      {error && <div style={{ color: PALETTE.crimson, fontSize: 12.5, marginBottom: 12 }}>{error}</div>}
+      {error && <div style={{ color: PALETTE.crimsonText, fontSize: 12.5, marginBottom: 12 }}>{error}</div>}
 
       {calculadas.length === 0 ? (
         <div style={{ color: PALETTE.textMuted, padding: 24, textAlign: "center", fontSize: 13 }}>

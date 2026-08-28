@@ -131,7 +131,7 @@ export function AssetsManager({ ativosList, onAdd, onRename, onRemove }) {
           <Plus size={15} /> Adicionar ativo
         </button>
       </div>
-      {addError && <div style={{ color: PALETTE.crimson, fontSize: 12, marginBottom: 16 }}>{addError}</div>}
+      {addError && <div style={{ color: PALETTE.crimsonText, fontSize: 12, marginBottom: 16 }}>{addError}</div>}
       <div style={{ marginBottom: addError ? 8 : 24 }} />
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 8 }}>
@@ -198,7 +198,7 @@ export function AssetsManager({ ativosList, onAdd, onRename, onRemove }) {
                 </div>
               )}
               {isEditing && editError && (
-                <div style={{ color: PALETTE.crimson, fontSize: 11, marginTop: 6 }}>{editError}</div>
+                <div style={{ color: PALETTE.crimsonText, fontSize: 11, marginTop: 6 }}>{editError}</div>
               )}
             </div>
           );

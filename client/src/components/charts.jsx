@@ -184,11 +184,12 @@ export function renderPie2D({ data, colors, cyTop, outerRadius, innerRadius = 0,
   return children;
 }
 
-export function PieChartCard({ title, data }) {
+export function PieChartCard({ title, data, colorMap }) {
   const reducedMotion = usePrefersReducedMotion();
   const positivos = data.filter((d) => d.value > 0);
   const total = positivos.reduce((s, d) => s + d.value, 0);
   const sorted = [...positivos].sort((a, b) => b.value - a.value);
+  const colors = colorMap ? sorted.map((d) => colorMap[d.name] || BAR_COLORS[0]) : BAR_COLORS;
   return (
     <div
       className="card-surface"
@@ -213,7 +214,7 @@ export function PieChartCard({ title, data }) {
               <PieChart>
                 {renderPie2D({
                   data: sorted,
-                  colors: BAR_COLORS,
+                  colors,
                   cyTop: 130,
                   outerRadius: 100,
                   innerRadius: 58,
@@ -228,7 +229,7 @@ export function PieChartCard({ title, data }) {
           <div style={{ flex: "1 1 260px", minWidth: 240, display: "flex", flexDirection: "column", gap: 10 }}>
             {sorted.map((d, i) => {
               const pct = total ? (d.value / total) * 100 : 0;
-              const color = BAR_COLORS[i % BAR_COLORS.length];
+              const color = colors[i % colors.length];
               return (
                 <div key={d.name} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ width: 8, height: 8, borderRadius: 999, background: color, flexShrink: 0 }} />
@@ -254,8 +255,9 @@ export function PieChartCard({ title, data }) {
   );
 }
 
-export function ChartCard({ title, data, angledLabels }) {
+export function ChartCard({ title, data, angledLabels, colorMap }) {
   const reducedMotion = usePrefersReducedMotion();
+  const colors = colorMap ? data.map((d) => colorMap[d.name] || BAR_COLORS[0]) : BAR_COLORS;
   return (
     <div
       className="card-surface"
@@ -303,13 +305,13 @@ export function ChartCard({ title, data, angledLabels }) {
             <Bar
               dataKey="value"
               shape={Bar3DShape}
-              label={Bar3DLabel(BAR_COLORS)}
+              label={Bar3DLabel(colors)}
               isAnimationActive={!reducedMotion}
               animationDuration={700}
               animationEasing="ease-out"
             >
               {data.map((_, i) => (
-                <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />
+                <Cell key={i} fill={colors[i % colors.length]} />
               ))}
             </Bar>
           </BarChart>

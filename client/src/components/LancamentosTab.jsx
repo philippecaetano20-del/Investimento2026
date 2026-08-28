@@ -104,7 +104,7 @@ export function LancamentosTab({
           </button>
         </div>
       </div>
-      {saveError && <div style={{ color: PALETTE.crimson, fontSize: 12, marginBottom: 10 }}>{saveError}</div>}
+      {saveError && <div style={{ color: PALETTE.crimsonText, fontSize: 12, marginBottom: 10 }}>{saveError}</div>}
 
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
         <div style={{ fontSize: 11.5, color: PALETTE.textMuted }}>
@@ -237,7 +237,7 @@ export function LancamentosTab({
                 <div className="mono" style={{ textAlign: "right", fontSize: 12.5, color: PALETTE.textMuted }}>
                   {e.quantidade}
                 </div>
-                <div className="mono" style={{ textAlign: "right", fontWeight: 600, color: e.valorInvestido < 0 ? PALETTE.crimson : PALETTE.textPrimary }}>
+                <div className="mono" style={{ textAlign: "right", fontWeight: 600, color: e.valorInvestido < 0 ? PALETTE.crimsonText : PALETTE.textPrimary }}>
                   {formatBRL(e.valorInvestido)}
                 </div>
                 <div
@@ -245,13 +245,13 @@ export function LancamentosTab({
                   style={{
                     textAlign: "right",
                     fontSize: 12.5,
-                    color: e.rentabilidade >= 0 ? PALETTE.emerald : PALETTE.crimson,
+                    color: e.rentabilidade >= 0 ? PALETTE.emerald : PALETTE.crimsonText,
                   }}
                 >
                   {e.rentabilidade >= 0 ? "+" : ""}
                   {e.rentabilidade.toFixed(2)}%
                 </div>
-                <div className="mono" style={{ textAlign: "right", fontSize: 12.5, color: e.valorReinvestido < 0 ? PALETTE.crimson : PALETTE.textMuted }}>
+                <div className="mono" style={{ textAlign: "right", fontSize: 12.5, color: e.valorReinvestido < 0 ? PALETTE.crimsonText : PALETTE.textMuted }}>
                   {formatBRL(e.valorReinvestido)}
                 </div>
                 <div

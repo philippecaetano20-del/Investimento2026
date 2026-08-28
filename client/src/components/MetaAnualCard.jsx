@@ -125,7 +125,7 @@ export function MetaAnualCard({ ano, investidoAno, meta, onSaveMeta }) {
                     <X size={15} color={PALETTE.textMuted} />
                   </button>
                 </div>
-                {editError && <div style={{ color: PALETTE.crimson, fontSize: 11, marginTop: 4 }}>{editError}</div>}
+                {editError && <div style={{ color: PALETTE.crimsonText, fontSize: 11, marginTop: 4 }}>{editError}</div>}
               </div>
             ) : (
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -152,7 +152,7 @@ export function MetaAnualCard({ ano, investidoAno, meta, onSaveMeta }) {
                 <div style={{ fontSize: 10.5, color: PALETTE.textMuted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
                   {atingida ? "Meta batida, excedente" : "Ainda resta"}
                 </div>
-                <div className="mono" style={{ fontSize: 18, fontWeight: 600, color: atingida ? PALETTE.gold : PALETTE.crimson }}>
+                <div className="mono" style={{ fontSize: 18, fontWeight: 600, color: atingida ? PALETTE.gold : PALETTE.crimsonText }}>
                   {formatBRL(restanteAnimado)}
                 </div>
               </div>

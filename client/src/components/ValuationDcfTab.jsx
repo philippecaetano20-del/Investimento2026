@@ -308,7 +308,7 @@ export function ValuationDcfTab() {
           Adicionar
         </button>
       </div>
-      {error && <div style={{ color: PALETTE.crimson, fontSize: 12.5, marginBottom: 16 }}>{error}</div>}
+      {error && <div style={{ color: PALETTE.crimsonText, fontSize: 12.5, marginBottom: 16 }}>{error}</div>}
 
       {calculadas.length === 0 ? (
         <div
@@ -409,7 +409,7 @@ export function ValuationDcfTab() {
                 {r.taxaPerpetuidade.toFixed(2)}%), mais conservadora, já que nenhuma empresa sustenta o crescimento de
                 curto prazo para sempre.
                 {!r.podeCalcularTerminal && (
-                  <span style={{ color: PALETTE.crimson }}> A taxa de desconto precisa ser maior que a taxa de perpetuidade para calcular o valor terminal.</span>
+                  <span style={{ color: PALETTE.crimsonText }}> A taxa de desconto precisa ser maior que a taxa de perpetuidade para calcular o valor terminal.</span>
                 )}
               </div>
 

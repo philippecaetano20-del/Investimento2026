@@ -4,7 +4,7 @@ import { PALETTE } from "./constants.js";
 import { formatBRL, monthLabel, emptyForm, parseNumBR } from "./utils.js";
 import { api, getToken, clearToken, setUnauthorizedHandler } from "./api.js";
 import { useCountUp } from "./useCountUp.js";
-import { HISTORICO_ANOS_ANTERIORES } from "./constants.js";
+import { HISTORICO_ANOS_ANTERIORES, TIPO_COLORS } from "./constants.js";
 import { ChartCard, PieChartCard } from "./components/charts.jsx";
 import { MetaAnualCard } from "./components/MetaAnualCard.jsx";
 import { TabButton } from "./components/TabButton.jsx";
@@ -532,8 +532,8 @@ function Dashboard({ user, onLogout }) {
               }}
             >
               <ChartCard title="Por ativo" data={porAtivo} angledLabels />
-              <ChartCard title="Por classe" data={porTipo} />
-              <PieChartCard title="Distribuição da carteira por classe" data={porTipo} />
+              <ChartCard title="Por classe" data={porTipo} colorMap={TIPO_COLORS} />
+              <PieChartCard title="Distribuição da carteira por classe" data={porTipo} colorMap={TIPO_COLORS} />
               <ChartCard title="Por mês" data={porMes} />
               <ChartCard title="Por ano" data={porAno} />
             </div>
@@ -609,7 +609,7 @@ function InviteButton() {
             {loading ? (
               <div style={{ fontSize: 12, color: PALETTE.textMuted }}>Gerando link...</div>
             ) : error ? (
-              <div style={{ fontSize: 12, color: PALETTE.crimson }}>{error}</div>
+              <div style={{ fontSize: 12, color: PALETTE.crimsonText }}>{error}</div>
             ) : (
               <div style={{ display: "flex", gap: 6 }}>
                 <input

@@ -119,7 +119,7 @@ export function AcceptInvitePage({ token, onAccepted }) {
           />
         </div>
 
-        {error && <div style={{ color: PALETTE.crimson, fontSize: 12.5, margin: "10px 0" }}>{error}</div>}
+        {error && <div style={{ color: PALETTE.crimsonText, fontSize: 12.5, margin: "10px 0" }}>{error}</div>}
 
         <button
           type="submit"

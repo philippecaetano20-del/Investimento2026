@@ -207,7 +207,7 @@ export function RankingFiis({ ativosList }) {
         </div>
       </div>
 
-      {error && <div style={{ color: PALETTE.crimson, fontSize: 13, marginBottom: 12 }}>{error}</div>}
+      {error && <div style={{ color: PALETTE.crimsonText, fontSize: 13, marginBottom: 12 }}>{error}</div>}
 
       {loading ? (
         <div style={{ color: PALETTE.textMuted, padding: 30, textAlign: "center", fontSize: 13 }}>Carregando ranking de FIIs...</div>

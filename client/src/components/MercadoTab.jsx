@@ -193,7 +193,7 @@ export function MercadoTab({ ativosList }) {
         </div>
       ) : null}
 
-      {error && <div style={{ color: PALETTE.crimson, fontSize: 13, marginBottom: 16 }}>{error}</div>}
+      {error && <div style={{ color: PALETTE.crimsonText, fontSize: 13, marginBottom: 16 }}>{error}</div>}
 
       {loading && (
         <div style={{ color: PALETTE.textMuted, padding: 40, textAlign: "center" }}>Buscando cotação...</div>
@@ -225,7 +225,7 @@ export function MercadoTab({ ativosList }) {
                   justifyContent: "flex-end",
                   gap: 4,
                   fontSize: 13,
-                  color: positivo ? PALETTE.emerald : PALETTE.crimson,
+                  color: positivo ? PALETTE.emerald : PALETTE.crimsonText,
                 }}
               >
                 {positivo ? <TrendingUp size={14} /> : <TrendingDown size={14} />}

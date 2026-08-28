@@ -37,7 +37,7 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
   const valorInvestidoExibido = reinvestido ? 0 : calculado;
   const readonlyMoneyStyle = (valor) => ({
     ...moneyInput,
-    color: valor < 0 ? PALETTE.crimson : PALETTE.gold,
+    color: valor < 0 ? PALETTE.crimsonText : PALETTE.gold,
     fontWeight: 600,
     cursor: "not-allowed",
   });
@@ -163,7 +163,7 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
               </div>
             </div>
           </div>
-          {error && <div style={{ color: PALETTE.crimson, fontSize: 12, marginBottom: 12 }}>{error}</div>}
+          {error && <div style={{ color: PALETTE.crimsonText, fontSize: 12, marginBottom: 12 }}>{error}</div>}
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
             <button
               type="button"
