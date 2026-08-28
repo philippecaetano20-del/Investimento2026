@@ -72,7 +72,8 @@ export function Bar3DLabel(colors) {
     const w = width * 0.62;
     const depth = Math.min(16, width * 0.3);
     const cx = Math.round(x + (width - w - depth) / 2 + w / 2 + depth / 2);
-    const bx = Math.round(cx - boxWidth / 2);
+    // Clamp so the leftmost bar's label never renders past the chart's left edge (was going negative on narrow/mobile charts).
+    const bx = Math.max(2, Math.round(cx - boxWidth / 2));
     const by = Math.round(y - depth - boxHeight - 9);
     const color = colors[index % colors.length];
     return (
