@@ -3,6 +3,7 @@ import { Wallet, LogOut, UserPlus, Copy, Check } from "lucide-react";
 import { PALETTE } from "./constants.js";
 import { formatBRL, monthLabel, emptyForm, parseNumBR } from "./utils.js";
 import { api, getToken, clearToken, setUnauthorizedHandler } from "./api.js";
+import { useCountUp } from "./useCountUp.js";
 import { HISTORICO_ANOS_ANTERIORES } from "./constants.js";
 import { ChartCard, PieChartCard } from "./components/charts.jsx";
 import { MetaAnualCard } from "./components/MetaAnualCard.jsx";
@@ -217,6 +218,8 @@ function Dashboard({ user, onLogout }) {
     return { totalInvestido, rentMedia, ativos };
   }, [entries]);
 
+  const totalInvestidoAnimado = useCountUp(totals.totalInvestido);
+
   const anosDisponiveis = useMemo(() => {
     const anoReal = new Date().getFullYear();
     const anos = new Set([anoReal, anoReal + 1]);
@@ -327,6 +330,10 @@ function Dashboard({ user, onLogout }) {
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .spin { animation: spin 0.8s linear infinite; }
 
+        @keyframes tabFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-fade { animation: tabFade 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @media (prefers-reduced-motion: reduce) { .tab-fade { animation: none; } }
+
         @media (max-width: 640px) {
           .tabs-scroll {
             mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
@@ -419,7 +426,7 @@ function Dashboard({ user, onLogout }) {
               TOTAL INVESTIDO
             </div>
             <div className="mono" style={{ fontSize: 34, fontWeight: 600, color: PALETTE.textPrimary }}>
-              {formatBRL(totals.totalInvestido)}
+              {formatBRL(totalInvestidoAnimado)}
             </div>
           </div>
         </div>
@@ -452,7 +459,7 @@ function Dashboard({ user, onLogout }) {
           </TabButton>
         </div>
 
-        <div className="reveal reveal-3">
+        <div className="tab-fade" key={activeTab}>
         {loading ? (
           <div style={{ color: PALETTE.textMuted, padding: 40, textAlign: "center" }}>
             <div>Carregando dados...</div>

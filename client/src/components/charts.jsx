@@ -1,7 +1,20 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from "recharts";
 import { PALETTE, BAR_COLORS } from "../constants.js";
 import { formatBRL } from "../utils.js";
+
+export function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return reduced;
+}
 
 export function shadeColor(hex, percent) {
   const num = parseInt(hex.replace("#", ""), 16);
@@ -109,7 +122,7 @@ function PizzaLabel(props) {
 /** Pizza 2D simples. Retorna um array de elementos <Pie>/<Tooltip>/<Legend> que deve ser
  *  espalhado DIRETAMENTE como filhos de <PieChart> — o Recharts só reconhece esses
  *  componentes quando são filhos imediatos, então não dá pra embrulhar isso num componente próprio. */
-export function renderPie2D({ data, colors, cyTop, outerRadius, innerRadius = 0, showLabel, showTooltip, showLegend }) {
+export function renderPie2D({ data, colors, cyTop, outerRadius, innerRadius = 0, showLabel, showTooltip, showLegend, animate = true }) {
   const children = [];
 
   children.push(
@@ -128,7 +141,9 @@ export function renderPie2D({ data, colors, cyTop, outerRadius, innerRadius = 0,
       strokeWidth={2}
       label={showLabel ? PizzaLabel : false}
       labelLine={showLabel ? { stroke: PALETTE.line } : false}
-      isAnimationActive={false}
+      isAnimationActive={animate}
+      animationDuration={800}
+      animationEasing="ease-out"
     >
       {data.map((_, i) => (
         <Cell key={i} fill={colors[i % colors.length]} />
@@ -170,6 +185,7 @@ export function renderPie2D({ data, colors, cyTop, outerRadius, innerRadius = 0,
 }
 
 export function PieChartCard({ title, data }) {
+  const reducedMotion = usePrefersReducedMotion();
   const positivos = data.filter((d) => d.value > 0);
   const total = positivos.reduce((s, d) => s + d.value, 0);
   const sorted = [...positivos].sort((a, b) => b.value - a.value);
@@ -204,6 +220,7 @@ export function PieChartCard({ title, data }) {
                   showLabel: false,
                   showTooltip: true,
                   showLegend: false,
+                  animate: !reducedMotion,
                 })}
               </PieChart>
             </ResponsiveContainer>
@@ -238,6 +255,7 @@ export function PieChartCard({ title, data }) {
 }
 
 export function ChartCard({ title, data, angledLabels }) {
+  const reducedMotion = usePrefersReducedMotion();
   return (
     <div
       className="card-surface"
@@ -282,7 +300,14 @@ export function ChartCard({ title, data, angledLabels }) {
               labelStyle={{ color: PALETTE.textPrimary }}
               cursor={{ fill: "rgba(255,255,255,0.03)" }}
             />
-            <Bar dataKey="value" shape={Bar3DShape} label={Bar3DLabel(BAR_COLORS)} isAnimationActive={false}>
+            <Bar
+              dataKey="value"
+              shape={Bar3DShape}
+              label={Bar3DLabel(BAR_COLORS)}
+              isAnimationActive={!reducedMotion}
+              animationDuration={700}
+              animationEasing="ease-out"
+            >
               {data.map((_, i) => (
                 <Cell key={i} fill={BAR_COLORS[i % BAR_COLORS.length]} />
               ))}

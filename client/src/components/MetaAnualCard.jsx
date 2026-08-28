@@ -3,7 +3,8 @@ import { ResponsiveContainer, PieChart } from "recharts";
 import { Pencil, Check, X, Target } from "lucide-react";
 import { PALETTE } from "../constants.js";
 import { formatBRL, parseNumBR } from "../utils.js";
-import { renderPie2D } from "./charts.jsx";
+import { renderPie2D, usePrefersReducedMotion } from "./charts.jsx";
+import { useCountUp } from "../useCountUp.js";
 
 const iconBtnStyle = {
   background: "transparent",
@@ -18,6 +19,7 @@ const iconBtnStyle = {
 };
 
 export function MetaAnualCard({ ano, investidoAno, meta, onSaveMeta }) {
+  const reducedMotion = usePrefersReducedMotion();
   const [editing, setEditing] = useState(false);
   const [valorEdit, setValorEdit] = useState("");
   const [saving, setSaving] = useState(false);
@@ -55,6 +57,9 @@ export function MetaAnualCard({ ano, investidoAno, meta, onSaveMeta }) {
   const restante = meta - investidoAno;
   const pct = semMeta ? 0 : Math.max(0, Math.min(100, (investidoAno / meta) * 100));
   const atingida = !semMeta && restante <= 0;
+  const investidoAnimado = useCountUp(investidoAno);
+  const restanteAnimado = useCountUp(Math.abs(restante));
+  const pctAnimado = useCountUp(pct);
   const pieData = [
     { name: "Investido", value: Math.min(investidoAno, meta || 0) },
     { name: "Ainda resta", value: Math.max(0, restante) },
@@ -140,7 +145,7 @@ export function MetaAnualCard({ ano, investidoAno, meta, onSaveMeta }) {
                   Já investido
                 </div>
                 <div className="mono" style={{ fontSize: 18, fontWeight: 600, color: PALETTE.emerald }}>
-                  {formatBRL(investidoAno)}
+                  {formatBRL(investidoAnimado)}
                 </div>
               </div>
               <div>
@@ -148,7 +153,7 @@ export function MetaAnualCard({ ano, investidoAno, meta, onSaveMeta }) {
                   {atingida ? "Meta batida, excedente" : "Ainda resta"}
                 </div>
                 <div className="mono" style={{ fontSize: 18, fontWeight: 600, color: atingida ? PALETTE.gold : PALETTE.crimson }}>
-                  {formatBRL(Math.abs(restante))}
+                  {formatBRL(restanteAnimado)}
                 </div>
               </div>
             </>
@@ -165,16 +170,15 @@ export function MetaAnualCard({ ano, investidoAno, meta, onSaveMeta }) {
             <div style={{ background: PALETTE.bg, borderRadius: 999, height: 10, overflow: "hidden", border: `1px solid ${PALETTE.line}` }}>
               <div
                 style={{
-                  width: `${pct}%`,
+                  width: `${pctAnimado}%`,
                   height: "100%",
                   background: atingida ? PALETTE.emerald : PALETTE.gold,
                   borderRadius: 999,
-                  transition: "width 0.3s ease",
                 }}
               />
             </div>
             <div className="mono" style={{ fontSize: 11, color: PALETTE.textMuted, marginTop: 6, textAlign: "right" }}>
-              {pct.toFixed(1)}% da meta
+              {pctAnimado.toFixed(1)}% da meta
             </div>
           </>
         )}
@@ -184,7 +188,7 @@ export function MetaAnualCard({ ano, investidoAno, meta, onSaveMeta }) {
         <div style={{ flex: "0 0 220px", width: 220 }}>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              {renderPie2D({ data: pieData, colors: pieColors, cyTop: 105, outerRadius: 78, showLabel: false, showTooltip: true, showLegend: false })}
+              {renderPie2D({ data: pieData, colors: pieColors, cyTop: 105, outerRadius: 78, showLabel: false, showTooltip: true, showLegend: false, animate: !reducedMotion })}
             </PieChart>
           </ResponsiveContainer>
           <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: -8 }}>
