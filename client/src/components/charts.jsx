@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from "recharts";
 import { PALETTE, BAR_COLORS } from "../constants.js";
 import { formatBRL } from "../utils.js";
@@ -14,6 +14,18 @@ export function usePrefersReducedMotion() {
     return () => mq.removeEventListener("change", onChange);
   }, []);
   return reduced;
+}
+
+function useIsNarrowViewport(breakpoint = 480) {
+  const [narrow, setNarrow] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < breakpoint : false
+  );
+  useEffect(() => {
+    const onResize = () => setNarrow(window.innerWidth < breakpoint);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [breakpoint]);
+  return narrow;
 }
 
 export function shadeColor(hex, percent) {
@@ -257,7 +269,14 @@ export function PieChartCard({ title, data, colorMap }) {
 
 export function ChartCard({ title, data, angledLabels, colorMap }) {
   const reducedMotion = usePrefersReducedMotion();
-  const colors = colorMap ? data.map((d) => colorMap[d.name] || BAR_COLORS[0]) : BAR_COLORS;
+  const narrow = useIsNarrowViewport();
+  const chartData = useMemo(() => {
+    if (!narrow || data.length <= 6) return data;
+    const top = data.slice(0, 5);
+    const restSum = data.slice(5).reduce((s, d) => s + d.value, 0);
+    return restSum > 0 ? [...top, { name: "Outros", value: restSum }] : top;
+  }, [data, narrow]);
+  const colors = colorMap ? chartData.map((d) => colorMap[d.name] || BAR_COLORS[0]) : BAR_COLORS;
   return (
     <div
       className="card-surface"
@@ -266,18 +285,19 @@ export function ChartCard({ title, data, angledLabels, colorMap }) {
         border: `1px solid ${PALETTE.line}`,
         borderRadius: 10,
         padding: "16px 18px 8px",
+        overflowX: "hidden",
       }}
     >
       <div className="display" style={{ fontSize: 14, fontWeight: 500, marginBottom: 10, color: PALETTE.textPrimary }}>
         {title}
       </div>
-      {data.length === 0 ? (
+      {chartData.length === 0 ? (
         <div style={{ height: 180, display: "flex", alignItems: "center", justifyContent: "center", color: PALETTE.textMuted, fontSize: 12 }}>
           Sem dados
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={angledLabels ? 320 : 260}>
-          <BarChart data={data} margin={{ top: 50, right: 20, left: 0, bottom: angledLabels ? 70 : 0 }}>
+          <BarChart data={chartData} margin={{ top: 50, right: 20, left: 0, bottom: angledLabels ? 70 : 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={PALETTE.line} vertical={false} />
             <XAxis
               dataKey="name"
@@ -310,7 +330,7 @@ export function ChartCard({ title, data, angledLabels, colorMap }) {
               animationDuration={700}
               animationEasing="ease-out"
             >
-              {data.map((_, i) => (
+              {chartData.map((_, i) => (
                 <Cell key={i} fill={colors[i % colors.length]} />
               ))}
             </Bar>

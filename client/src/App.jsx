@@ -459,6 +459,10 @@ function Dashboard({ user, onLogout }) {
           </TabButton>
         </div>
 
+        {saveError && !loading && (
+          <div style={{ color: PALETTE.crimsonText, fontSize: 12.5, marginBottom: 16 }}>{saveError}</div>
+        )}
+
         <div className="tab-fade" key={activeTab}>
         {loading ? (
           <div style={{ color: PALETTE.textMuted, padding: 40, textAlign: "center" }}>
@@ -486,7 +490,6 @@ function Dashboard({ user, onLogout }) {
             openEditForm={openEditForm}
             handleDelete={handleDelete}
             openNewForm={openNewForm}
-            saveError={saveError}
             formOpen={formOpen}
             form={form}
             setForm={setForm}
@@ -522,6 +525,8 @@ function Dashboard({ user, onLogout }) {
               </select>
             </div>
 
+            <MetaAnualCard ano={anoSelecionado} investidoAno={investidoAnoSelecionado} meta={meta} onSaveMeta={saveMeta} />
+
             {/* Charts */}
             <div
               style={{
@@ -532,13 +537,10 @@ function Dashboard({ user, onLogout }) {
               }}
             >
               <ChartCard title="Por ativo" data={porAtivo} angledLabels />
-              <ChartCard title="Por classe" data={porTipo} colorMap={TIPO_COLORS} />
-              <PieChartCard title="Distribuição da carteira por classe" data={porTipo} colorMap={TIPO_COLORS} />
+              <PieChartCard title="Por classe" data={porTipo} colorMap={TIPO_COLORS} />
               <ChartCard title="Por mês" data={porMes} />
               <ChartCard title="Por ano" data={porAno} />
             </div>
-
-            <MetaAnualCard ano={anoSelecionado} investidoAno={investidoAnoSelecionado} meta={meta} onSaveMeta={saveMeta} />
           </>
         )}
         </div>

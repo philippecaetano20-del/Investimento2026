@@ -36,7 +36,6 @@ export function LancamentosTab({
   openEditForm,
   handleDelete,
   openNewForm,
-  saveError,
   formOpen,
   form,
   setForm,
@@ -104,8 +103,6 @@ export function LancamentosTab({
           </button>
         </div>
       </div>
-      {saveError && <div style={{ color: PALETTE.crimsonText, fontSize: 12, marginBottom: 10 }}>{saveError}</div>}
-
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
         <div style={{ fontSize: 11.5, color: PALETTE.textMuted }}>
           {entriesFiltradas.length} de {sortedEntries.length} lançamento{sortedEntries.length !== 1 ? "s" : ""}
