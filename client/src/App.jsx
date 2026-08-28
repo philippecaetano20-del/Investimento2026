@@ -74,7 +74,9 @@ function Dashboard({ user, onLogout }) {
   const [meta, setMeta] = useState(0);
   const [anoSelecionado, setAnoSelecionado] = useState(String(new Date().getFullYear()));
 
-  useEffect(() => {
+  function loadData() {
+    setLoading(true);
+    setSaveError("");
     const slowTimer = setTimeout(() => setSlowLoading(true), 4000);
     (async () => {
       try {
@@ -86,10 +88,13 @@ function Dashboard({ user, onLogout }) {
       } finally {
         clearTimeout(slowTimer);
         setLoading(false);
+        setSlowLoading(false);
       }
     })();
     return () => clearTimeout(slowTimer);
-  }, []);
+  }
+
+  useEffect(loadData, []);
 
   useEffect(() => {
     api
@@ -460,7 +465,25 @@ function Dashboard({ user, onLogout }) {
         </div>
 
         {saveError && !loading && (
-          <div style={{ color: PALETTE.crimsonText, fontSize: 12.5, marginBottom: 16 }}>{saveError}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <div style={{ color: PALETTE.crimsonText, fontSize: 12.5 }}>{saveError}</div>
+            <button
+              onClick={loadData}
+              style={{
+                background: "transparent",
+                border: `1px solid ${PALETTE.crimsonText}`,
+                color: PALETTE.crimsonText,
+                borderRadius: 6,
+                padding: "4px 10px",
+                fontSize: 12,
+                cursor: "pointer",
+                fontFamily: "'Manrope', sans-serif",
+                flexShrink: 0,
+              }}
+            >
+              Tentar novamente
+            </button>
+          </div>
         )}
 
         <div className="tab-fade" key={activeTab}>
