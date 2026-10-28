@@ -25,7 +25,6 @@ const COLUNAS_EXTRATO = [
   { key: "quantidade", label: "Quantidade", align: "right", format: (v) => String(v) },
   { key: "valorInvestido", label: "Valor Investido", align: "right", format: (v) => formatBRL(v) },
   { key: "rentabilidade", label: "Rentabilidade", align: "right", format: (v) => `${v >= 0 ? "+" : ""}${Number(v).toFixed(2)}%` },
-  { key: "valorReinvestido", label: "Valor Investido/Reinvestido", align: "right", format: (v) => formatBRL(v) },
 ];
 
 const FORMATO_BRL = '"R$" #,##0.00;[Red]-"R$" #,##0.00';
@@ -39,7 +38,6 @@ const COLUNAS_PLANILHA = [
   { header: "Quantidade", width: 12, cell: (e) => ({ value: Number(e.quantidade), type: Number }) },
   { header: "Valor Investido", width: 18, cell: (e) => ({ value: Number(e.valorInvestido), type: Number, format: FORMATO_BRL }) },
   { header: "Rentabilidade", width: 14, cell: (e) => ({ value: Number(e.rentabilidade) / 100, type: Number, format: "+0.00%;-0.00%;0.00%" }) },
-  { header: "Valor Investido/Reinvestido", width: 26, cell: (e) => ({ value: Number(e.valorReinvestido), type: Number, format: FORMATO_BRL }) },
 ];
 
 async function exportarExtratoExcel(entries) {
@@ -55,7 +53,7 @@ async function exportarExtratoExcel(entries) {
 }
 
 const GRID_COLUNAS =
-  "minmax(85px, 0.85fr) minmax(110px, 1.1fr) minmax(85px, 0.85fr) minmax(100px, 1fr) minmax(75px, 0.75fr) minmax(105px, 1.05fr) minmax(115px, 1.15fr) minmax(175px, 1.75fr) 55px";
+  "minmax(85px, 0.85fr) minmax(110px, 1.1fr) minmax(85px, 0.85fr) minmax(100px, 1fr) minmax(75px, 0.75fr) minmax(105px, 1.05fr) minmax(115px, 1.15fr) 55px";
 
 export function LancamentosTab({
   sortedEntries,
@@ -220,7 +218,7 @@ export function LancamentosTab({
               : "Nenhum lançamento encontrado para esse filtro."}
           </div>
         ) : (
-          <div style={{ minWidth: 1000 }}>
+          <div style={{ minWidth: 860 }}>
             <div
               style={{
                 display: "grid",
@@ -325,9 +323,6 @@ export function LancamentosTab({
                 >
                   {e.rentabilidade >= 0 ? "+" : ""}
                   {e.rentabilidade.toFixed(2)}%
-                </div>
-                <div className="mono" style={{ textAlign: "right", fontSize: 12.5, color: e.valorReinvestido < 0 ? PALETTE.crimsonText : PALETTE.textMuted }}>
-                  {formatBRL(e.valorReinvestido)}
                 </div>
                 <div
                   className="row-actions"

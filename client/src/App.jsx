@@ -185,9 +185,9 @@ function Dashboard({ user, onLogout }) {
       data: form.data,
       valorPago: parseNumBR(form.valorPago) || 0,
       quantidade: isRendaFixa ? 1 : parseNumBR(form.quantidade) || 0,
-      rentabilidade: isRendaFixa ? 0 : parseNumBR(form.rentabilidade) || 0,
+      rentabilidade: parseNumBR(form.rentabilidade) || 0,
       valorReinvestido: parseNumBR(form.valorReinvestido) || 0,
-      estaReinvestido: !isRendaFixa && form.estaReinvestido === "Sim",
+      estaReinvestido: form.estaReinvestido === "Sim",
       saque: isRendaFixa && form.saque === "Sim",
     };
 

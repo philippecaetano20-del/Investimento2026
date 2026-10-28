@@ -36,8 +36,8 @@ function isTrue(v) {
 
 function toEntryRow(body, id) {
   const saque = isTrue(body.saque);
-  // Saque: dinheiro que sai da Renda Fixa para outra classe. Gravado como valor negativo,
-  // mas sem alterar o total investido (a compra na outra classe entra como reinvestida)
+  // Saque: dinheiro que sai da Renda Fixa para outra classe, gravado como valor negativo.
+  // Reduz o total investido, que volta a subir quando a compra na outra classe é lançada.
   const valorPago = saque ? -Math.abs(num(body.valorPago)) : num(body.valorPago);
   const quantidade = num(body.quantidade);
   const estaReinvestido = !saque && isTrue(body.estaReinvestido);
@@ -48,7 +48,7 @@ function toEntryRow(body, id) {
     nivel: String(body.nivel || "").trim(),
     valorPago,
     quantidade,
-    valorInvestido: estaReinvestido || saque ? 0 : calculado,
+    valorInvestido: estaReinvestido ? 0 : calculado,
     data: String(body.data || ""),
     rentabilidade: num(body.rentabilidade),
     valorReinvestido: calculado,

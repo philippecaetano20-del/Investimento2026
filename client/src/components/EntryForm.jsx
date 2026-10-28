@@ -35,17 +35,18 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
   const saque = isRendaFixa && form.saque === "Sim";
   const valorPagoNum = parseNumBR(form.valorPago) || 0;
   const calculado = (saque ? -Math.abs(valorPagoNum) : valorPagoNum) * quantidadeEfetiva;
-  const reinvestido = !isRendaFixa && form.estaReinvestido === "Sim";
-  // Saque só move o dinheiro da Renda Fixa para outra classe: não altera o total investido
-  const valorInvestidoExibido = reinvestido || saque ? 0 : calculado;
+  const isTesouro = form.tipo === "Tesouro Direto";
+  // Lançamentos antigos marcados como reinvestidos mantêm Valor Investido = 0
+  const valorInvestidoExibido = !saque && form.estaReinvestido === "Sim" ? 0 : calculado;
 
   function setTipo(e) {
     const tipo = e.target.value;
-    if (tipo === "Renda Fixa") {
-      setForm({ ...form, tipo, rentabilidade: "", estaReinvestido: "Não" });
-    } else {
-      setForm({ ...form, tipo, saque: "Não" });
-    }
+    setForm({
+      ...form,
+      tipo,
+      saque: tipo === "Renda Fixa" ? form.saque : "Não",
+      rentabilidade: tipo === "Tesouro Direto" ? form.rentabilidade : "",
+    });
   }
   const readonlyMoneyStyle = (valor) => ({
     ...moneyInput,
@@ -140,7 +141,7 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
                 </select>
                 {saque && (
                   <div style={{ fontSize: 10.5, color: PALETTE.textMuted, marginTop: 4 }}>
-                    O valor sai da Renda Fixa sem alterar o total investido. Na compra da outra classe, marque "Está Reinvestido?" = Sim.
+                    O valor sai da Renda Fixa e volta ao total quando você lançar a compra na outra classe.
                   </div>
                 )}
               </div>
@@ -149,15 +150,6 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
               <div>
                 <label style={label} htmlFor="entry-quantidade">Quantidade</label>
                 <input id="entry-quantidade" type="text" inputMode="decimal" style={input} value={form.quantidade} onChange={set("quantidade")} placeholder="0" />
-              </div>
-            )}
-            {!isRendaFixa && (
-              <div>
-                <label style={label} htmlFor="entry-reinvestido">Está Reinvestido?</label>
-                <select id="entry-reinvestido" style={input} value={form.estaReinvestido || "Não"} onChange={set("estaReinvestido")}>
-                  <option value="Não">Não</option>
-                  <option value="Sim">Sim</option>
-                </select>
               </div>
             )}
             <div>
@@ -173,25 +165,12 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
                 />
               </div>
             </div>
-            {!isRendaFixa && (
+            {isTesouro && (
               <div>
                 <label style={label} htmlFor="entry-rentabilidade">Rentabilidade</label>
                 <input id="entry-rentabilidade" type="text" inputMode="decimal" style={input} value={form.rentabilidade} onChange={set("rentabilidade")} placeholder="0,00" />
               </div>
             )}
-            <div>
-              <label style={label} htmlFor="entry-valor-reinvestido">Valor Investido/Reinvestido</label>
-              <div style={moneyInputWrap}>
-                <span style={moneyPrefix}>R$</span>
-                <input
-                  id="entry-valor-reinvestido"
-                  type="text"
-                  readOnly
-                  style={readonlyMoneyStyle(calculado)}
-                  value={calculado.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                />
-              </div>
-            </div>
           </div>
           {error && <div style={{ color: PALETTE.crimsonText, fontSize: 12, marginBottom: 12 }}>{error}</div>}
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
