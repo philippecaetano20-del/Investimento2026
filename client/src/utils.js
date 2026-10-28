@@ -36,5 +36,6 @@ export function emptyForm() {
     data: new Date().toISOString().slice(0, 10),
     valorReinvestido: "",
     estaReinvestido: "Não",
+    saque: "Não",
   };
 }

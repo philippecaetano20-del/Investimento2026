@@ -65,6 +65,10 @@ export async function initDb() {
     await db.execute("ALTER TABLE entries ADD COLUMN estaReinvestido INTEGER NOT NULL DEFAULT 0;");
     await db.execute("UPDATE entries SET estaReinvestido = 1 WHERE valorInvestido = 0 AND valorReinvestido > 0;");
   }
+  if (!entryColumns.includes("saque")) {
+    await db.execute("ALTER TABLE entries ADD COLUMN saque INTEGER NOT NULL DEFAULT 0;");
+    await db.execute("UPDATE entries SET saque = 1 WHERE valorPago < 0;");
+  }
   if (entryColumns.includes("reservaOportunidade")) {
     await db.execute("ALTER TABLE entries DROP COLUMN reservaOportunidade;");
   }

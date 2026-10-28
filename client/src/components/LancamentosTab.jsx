@@ -227,7 +227,24 @@ export function LancamentosTab({
                 <div className="mono" style={{ fontWeight: 600 }}>
                   {e.nivel}
                 </div>
-                <div style={{ fontSize: 11.5, color: PALETTE.textMuted }}>{e.tipo}</div>
+                <div style={{ fontSize: 11.5, color: PALETTE.textMuted }}>
+                  {e.tipo}
+                  {e.saque ? (
+                    <span
+                      style={{
+                        marginLeft: 6,
+                        padding: "1px 6px",
+                        borderRadius: 4,
+                        fontSize: 10,
+                        fontWeight: 600,
+                        color: PALETTE.crimsonText,
+                        border: `1px solid ${PALETTE.crimsonText}`,
+                      }}
+                    >
+                      Saque
+                    </span>
+                  ) : null}
+                </div>
                 <div className="mono" style={{ textAlign: "right", fontSize: 12.5 }}>
                   {formatBRL(e.valorPago)}
                 </div>

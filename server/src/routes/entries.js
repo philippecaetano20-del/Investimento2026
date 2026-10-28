@@ -16,6 +16,7 @@ const COLUMNS = [
   "rentabilidade",
   "valorReinvestido",
   "estaReinvestido",
+  "saque",
 ];
 const ALL_COLUMNS = [...COLUMNS, "userId"];
 
@@ -34,9 +35,11 @@ function isTrue(v) {
 }
 
 function toEntryRow(body, id) {
-  const valorPago = num(body.valorPago);
+  const saque = isTrue(body.saque);
+  // Saque: retirada que sai da carteira, sempre gravada como valor negativo
+  const valorPago = saque ? -Math.abs(num(body.valorPago)) : num(body.valorPago);
   const quantidade = num(body.quantidade);
-  const estaReinvestido = isTrue(body.estaReinvestido);
+  const estaReinvestido = !saque && isTrue(body.estaReinvestido);
   const calculado = valorPago * quantidade;
   return {
     id,
@@ -49,6 +52,7 @@ function toEntryRow(body, id) {
     rentabilidade: num(body.rentabilidade),
     valorReinvestido: calculado,
     estaReinvestido: estaReinvestido ? 1 : 0,
+    saque: saque ? 1 : 0,
   };
 }
 
@@ -150,6 +154,7 @@ router.post(
           rentabilidade: n.rentabilidade === "" ? 0 : num(n.rentabilidade),
           valorReinvestido,
           estaReinvestido: valorInvestido === 0 && valorReinvestido > 0 ? 1 : 0,
+          saque: num(n.valorPago) < 0 ? 1 : 0,
         };
         const existente = encontraIgual(dados);
         if (existente) {

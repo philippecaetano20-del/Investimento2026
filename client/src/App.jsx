@@ -144,7 +144,12 @@ function Dashboard({ user, onLogout }) {
   }
 
   function openEditForm(entry) {
-    setForm({ ...entry, estaReinvestido: entry.estaReinvestido ? "Sim" : "Não" });
+    setForm({
+      ...entry,
+      valorPago: entry.saque ? Math.abs(entry.valorPago) : entry.valorPago,
+      estaReinvestido: entry.estaReinvestido ? "Sim" : "Não",
+      saque: entry.saque ? "Sim" : "Não",
+    });
     setError("");
     setFormOpen(true);
   }
@@ -183,6 +188,7 @@ function Dashboard({ user, onLogout }) {
       rentabilidade: parseNumBR(form.rentabilidade) || 0,
       valorReinvestido: parseNumBR(form.valorReinvestido) || 0,
       estaReinvestido: form.estaReinvestido === "Sim",
+      saque: isRendaFixa && form.saque === "Sim",
     };
 
     setSaving(true);

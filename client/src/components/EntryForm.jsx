@@ -32,8 +32,10 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
 
   const isRendaFixa = form.tipo === "Renda Fixa";
   const quantidadeEfetiva = isRendaFixa ? 1 : parseNumBR(form.quantidade) || 0;
-  const calculado = (parseNumBR(form.valorPago) || 0) * quantidadeEfetiva;
-  const reinvestido = form.estaReinvestido === "Sim";
+  const saque = isRendaFixa && form.saque === "Sim";
+  const valorPagoNum = parseNumBR(form.valorPago) || 0;
+  const calculado = (saque ? -Math.abs(valorPagoNum) : valorPagoNum) * quantidadeEfetiva;
+  const reinvestido = !saque && form.estaReinvestido === "Sim";
   const valorInvestidoExibido = reinvestido ? 0 : calculado;
   const readonlyMoneyStyle = (valor) => ({
     ...moneyInput,
@@ -113,12 +115,26 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
                 <span style={moneyPrefix}>R$</span>
                 <input id="entry-valor-pago" type="text" inputMode="decimal" style={moneyInput} value={form.valorPago} onChange={set("valorPago")} placeholder="0,00" />
               </div>
-              {isRendaFixa && (
-                <div style={{ fontSize: 10.5, color: PALETTE.textMuted, marginTop: 4 }}>
-                  Dica: digite um valor negativo (ex: -500) para registrar uma retirada.
-                </div>
-              )}
             </div>
+            {isRendaFixa && (
+              <div>
+                <label style={label} htmlFor="entry-saque">Saque?</label>
+                <select
+                  id="entry-saque"
+                  style={input}
+                  value={form.saque || "Não"}
+                  onChange={(e) => setForm({ ...form, saque: e.target.value, estaReinvestido: e.target.value === "Sim" ? "Não" : form.estaReinvestido })}
+                >
+                  <option value="Não">Não</option>
+                  <option value="Sim">Sim</option>
+                </select>
+                {saque && (
+                  <div style={{ fontSize: 10.5, color: PALETTE.textMuted, marginTop: 4 }}>
+                    O valor será retirado da Renda Fixa para uso em outra classe.
+                  </div>
+                )}
+              </div>
+            )}
             {!isRendaFixa && (
               <div>
                 <label style={label} htmlFor="entry-quantidade">Quantidade</label>
@@ -127,7 +143,13 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
             )}
             <div>
               <label style={label} htmlFor="entry-reinvestido">Está Reinvestido?</label>
-              <select id="entry-reinvestido" style={input} value={form.estaReinvestido || "Não"} onChange={set("estaReinvestido")}>
+              <select
+                id="entry-reinvestido"
+                style={{ ...input, opacity: saque ? 0.5 : 1 }}
+                value={saque ? "Não" : form.estaReinvestido || "Não"}
+                onChange={set("estaReinvestido")}
+                disabled={saque}
+              >
                 <option value="Não">Não</option>
                 <option value="Sim">Sim</option>
               </select>
