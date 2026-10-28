@@ -35,8 +35,18 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
   const saque = isRendaFixa && form.saque === "Sim";
   const valorPagoNum = parseNumBR(form.valorPago) || 0;
   const calculado = (saque ? -Math.abs(valorPagoNum) : valorPagoNum) * quantidadeEfetiva;
-  const reinvestido = !saque && form.estaReinvestido === "Sim";
-  const valorInvestidoExibido = reinvestido ? 0 : calculado;
+  const reinvestido = !isRendaFixa && form.estaReinvestido === "Sim";
+  // Saque só move o dinheiro da Renda Fixa para outra classe: não altera o total investido
+  const valorInvestidoExibido = reinvestido || saque ? 0 : calculado;
+
+  function setTipo(e) {
+    const tipo = e.target.value;
+    if (tipo === "Renda Fixa") {
+      setForm({ ...form, tipo, rentabilidade: "", estaReinvestido: "Não" });
+    } else {
+      setForm({ ...form, tipo, saque: "Não" });
+    }
+  }
   const readonlyMoneyStyle = (valor) => ({
     ...moneyInput,
     color: valor < 0 ? PALETTE.crimsonText : PALETTE.gold,
@@ -89,7 +99,7 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 14 }}>
             <div>
               <label style={label} htmlFor="entry-tipo">Classe</label>
-              <select id="entry-tipo" style={input} value={form.tipo} onChange={set("tipo")}>
+              <select id="entry-tipo" style={input} value={form.tipo} onChange={setTipo}>
                 {TIPOS.map((t) => (
                   <option key={t} value={t}>{t}</option>
                 ))}
@@ -123,14 +133,14 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
                   id="entry-saque"
                   style={input}
                   value={form.saque || "Não"}
-                  onChange={(e) => setForm({ ...form, saque: e.target.value, estaReinvestido: e.target.value === "Sim" ? "Não" : form.estaReinvestido })}
+                  onChange={set("saque")}
                 >
                   <option value="Não">Não</option>
                   <option value="Sim">Sim</option>
                 </select>
                 {saque && (
                   <div style={{ fontSize: 10.5, color: PALETTE.textMuted, marginTop: 4 }}>
-                    O valor será retirado da Renda Fixa para uso em outra classe.
+                    O valor sai da Renda Fixa sem alterar o total investido. Na compra da outra classe, marque "Está Reinvestido?" = Sim.
                   </div>
                 )}
               </div>
@@ -141,19 +151,15 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
                 <input id="entry-quantidade" type="text" inputMode="decimal" style={input} value={form.quantidade} onChange={set("quantidade")} placeholder="0" />
               </div>
             )}
-            <div>
-              <label style={label} htmlFor="entry-reinvestido">Está Reinvestido?</label>
-              <select
-                id="entry-reinvestido"
-                style={{ ...input, opacity: saque ? 0.5 : 1 }}
-                value={saque ? "Não" : form.estaReinvestido || "Não"}
-                onChange={set("estaReinvestido")}
-                disabled={saque}
-              >
-                <option value="Não">Não</option>
-                <option value="Sim">Sim</option>
-              </select>
-            </div>
+            {!isRendaFixa && (
+              <div>
+                <label style={label} htmlFor="entry-reinvestido">Está Reinvestido?</label>
+                <select id="entry-reinvestido" style={input} value={form.estaReinvestido || "Não"} onChange={set("estaReinvestido")}>
+                  <option value="Não">Não</option>
+                  <option value="Sim">Sim</option>
+                </select>
+              </div>
+            )}
             <div>
               <label style={label} htmlFor="entry-valor-investido">Valor Investido</label>
               <div style={moneyInputWrap}>
@@ -167,10 +173,12 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
                 />
               </div>
             </div>
-            <div>
-              <label style={label} htmlFor="entry-rentabilidade">Rentabilidade</label>
-              <input id="entry-rentabilidade" type="text" inputMode="decimal" style={input} value={form.rentabilidade} onChange={set("rentabilidade")} placeholder="0,00" />
-            </div>
+            {!isRendaFixa && (
+              <div>
+                <label style={label} htmlFor="entry-rentabilidade">Rentabilidade</label>
+                <input id="entry-rentabilidade" type="text" inputMode="decimal" style={input} value={form.rentabilidade} onChange={set("rentabilidade")} placeholder="0,00" />
+              </div>
+            )}
             <div>
               <label style={label} htmlFor="entry-valor-reinvestido">Valor Investido/Reinvestido</label>
               <div style={moneyInputWrap}>
