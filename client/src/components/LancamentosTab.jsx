@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Plus, Trash2, Pencil, X } from "lucide-react";
+import { Plus, Trash2, Pencil, X, FileSpreadsheet } from "lucide-react";
 import { PALETTE } from "../constants.js";
 import { formatBRL, formatDateBR } from "../utils.js";
 import { EntryForm } from "./EntryForm.jsx";
@@ -28,6 +28,32 @@ const COLUNAS_EXTRATO = [
   { key: "valorReinvestido", label: "Valor Investido/Reinvestido", align: "right", format: (v) => formatBRL(v) },
 ];
 
+const FORMATO_BRL = '"R$" #,##0.00;[Red]-"R$" #,##0.00';
+
+// Mesmas colunas da tabela do extrato, com tipos e formatos nativos do Excel
+const COLUNAS_PLANILHA = [
+  { header: "Data", width: 12, cell: (e) => ({ value: new Date(e.data), type: Date, format: "dd/mm/yyyy" }) },
+  { header: "Ativo", width: 28, cell: (e) => ({ value: e.nivel, type: String }) },
+  { header: "Classe", width: 16, cell: (e) => ({ value: e.tipo, type: String }) },
+  { header: "Valor Pago", width: 16, cell: (e) => ({ value: Number(e.valorPago), type: Number, format: FORMATO_BRL }) },
+  { header: "Quantidade", width: 12, cell: (e) => ({ value: Number(e.quantidade), type: Number }) },
+  { header: "Valor Investido", width: 18, cell: (e) => ({ value: Number(e.valorInvestido), type: Number, format: FORMATO_BRL }) },
+  { header: "Rentabilidade", width: 14, cell: (e) => ({ value: Number(e.rentabilidade) / 100, type: Number, format: "+0.00%;-0.00%;0.00%" }) },
+  { header: "Valor Investido/Reinvestido", width: 26, cell: (e) => ({ value: Number(e.valorReinvestido), type: Number, format: FORMATO_BRL }) },
+];
+
+async function exportarExtratoExcel(entries) {
+  const { default: writeXlsxFile } = await import("write-excel-file/browser");
+  const cabecalho = COLUNAS_PLANILHA.map((c) => ({ value: c.header, fontWeight: "bold", backgroundColor: "#E8D9A8" }));
+  const linhas = entries.map((e) => COLUNAS_PLANILHA.map((c) => c.cell(e)));
+  const hoje = new Date().toISOString().slice(0, 10);
+  await writeXlsxFile([cabecalho, ...linhas], {
+    sheet: "Extrato",
+    columns: COLUNAS_PLANILHA.map((c) => ({ width: c.width })),
+    stickyRowsCount: 1,
+  }).toFile(`extrato-lancamentos-${hoje}.xlsx`);
+}
+
 const GRID_COLUNAS =
   "minmax(85px, 0.85fr) minmax(110px, 1.1fr) minmax(85px, 0.85fr) minmax(100px, 1fr) minmax(75px, 0.75fr) minmax(105px, 1.05fr) minmax(115px, 1.15fr) minmax(175px, 1.75fr) 55px";
 
@@ -47,6 +73,19 @@ export function LancamentosTab({
 }) {
   const [filters, setFilters] = useState({});
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [exportando, setExportando] = useState(false);
+
+  async function handleExportar() {
+    if (exportando) return;
+    setExportando(true);
+    try {
+      await exportarExtratoExcel(sortedEntries);
+    } catch (e) {
+      alert("Não foi possível gerar o extrato em Excel.");
+    } finally {
+      setExportando(false);
+    }
+  }
 
   function confirmDelete() {
     if (pendingDelete) handleDelete(pendingDelete.id);
@@ -82,6 +121,28 @@ export function LancamentosTab({
           Extrato de lançamentos
         </div>
         <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={handleExportar}
+            disabled={exportando || sortedEntries.length === 0}
+            title="Baixar todos os lançamentos em Excel"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              background: "transparent",
+              color: PALETTE.gold,
+              border: `1px solid ${PALETTE.gold}`,
+              borderRadius: 6,
+              padding: "8px 14px",
+              fontFamily: "'Manrope', sans-serif",
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: exportando || sortedEntries.length === 0 ? "default" : "pointer",
+              opacity: exportando || sortedEntries.length === 0 ? 0.6 : 1,
+            }}
+          >
+            <FileSpreadsheet size={15} /> {exportando ? "Gerando..." : "Extrato"}
+          </button>
           <button
             onClick={openNewForm}
             style={{
