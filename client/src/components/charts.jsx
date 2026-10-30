@@ -63,18 +63,70 @@ function useIsNarrowViewport(breakpoint = 560) {
   return narrow;
 }
 
+// Coluna 3D no estilo do Excel: frente na cor base, topo mais claro, lateral mais escura
+const BARRA_3D = { frente: "#4F7BE0", topo: "#7E9FEC", lado: "#2F55B0" };
+
+function profundidade(width) {
+  return Math.max(4, Math.min(12, width * 0.22));
+}
+
+function Barra3D({ x, y, width, height }) {
+  if (!height || height <= 0) return null;
+  const d = profundidade(width);
+  const w = width - d;
+  return (
+    <g>
+      <path d={`M${x + w},${y} L${x + w + d},${y - d} L${x + w + d},${y + height - d} L${x + w},${y + height} Z`} fill={BARRA_3D.lado} />
+      <path d={`M${x},${y} L${x + d},${y - d} L${x + w + d},${y - d} L${x + w},${y} Z`} fill={BARRA_3D.topo} />
+      <rect x={x} y={y} width={w} height={height} fill={BARRA_3D.frente} />
+    </g>
+  );
+}
+
+let contextoMedida;
+function larguraTexto(texto) {
+  if (!contextoMedida) {
+    contextoMedida = document.createElement("canvas").getContext("2d");
+    contextoMedida.font = `600 11.5px ${FONT}`;
+  }
+  return contextoMedida.measureText(texto).width;
+}
+
+function larguraCaixa(texto) {
+  return Math.ceil(larguraTexto(texto)) + 14;
+}
+
+function RotuloValor({ x, y, width, value, texto }) {
+  if (!value) return null;
+  const d = profundidade(width);
+  const caixaW = larguraCaixa(texto);
+  const cx = Math.max(caixaW / 2 + 1, x + (width - d) / 2 + d / 2);
+  const by = y - d - 26;
+  return (
+    <g>
+      <rect x={cx - caixaW / 2} y={by} width={caixaW} height={20} rx={4} fill={PALETTE.surfaceAlt} stroke="rgba(126,159,236,0.55)" />
+      <text x={cx} y={by + 14} textAnchor="middle" fill={PALETTE.textPrimary} fontSize={11.5} fontWeight={600} fontFamily={FONT} style={{ fontVariantNumeric: "tabular-nums" }}>
+        {texto}
+      </text>
+    </g>
+  );
+}
+
 export function ChartCard({ title, data, highlight, tickFormatter, className }) {
   const reducedMotion = usePrefersReducedMotion();
-  // No celular os rótulos se sobrepõem: o valor fica só no toque (tooltip), exceto o da barra em destaque
+  // No celular as caixas de valor se sobrepõem: mostra só a do período em destaque (as outras ficam no toque)
   const narrow = useIsNarrowViewport();
   const total = data.reduce((s, d) => s + d.value, 0);
+  const [largura, setLargura] = useState(0);
+  // Espaço horizontal de cada coluna, para escolher o rótulo mais completo que cabe sem sobrepor o vizinho
+  const espacoColuna = data.length ? (largura - 12) / data.length - 6 : 0;
   return (
     <Panel title={title} aside={data.length ? formatBRL(total) : null} className={className}>
       {data.length === 0 ? (
         <Vazio />
       ) : (
-        <ResponsiveContainer width="100%" height={290}>
-          <BarChart data={data} margin={{ top: 22, right: 4, left: 4, bottom: 0 }} barCategoryGap="22%">
+        <ResponsiveContainer width="100%" height={300} onResize={(w) => setLargura(w)}>
+          <BarChart data={data} margin={{ top: 44, right: 8, left: 4, bottom: 0 }} barCategoryGap="18%">
             <XAxis
               dataKey="name"
               tick={{ fill: PALETTE.textMuted, fontSize: 12, fontFamily: FONT }}
@@ -85,21 +137,21 @@ export function ChartCard({ title, data, highlight, tickFormatter, className }) 
             />
             <YAxis hide domain={[0, "dataMax"]} />
             <Tooltip {...tooltipProps} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
-            <Bar dataKey="value" radius={[4, 4, 0, 0]} isAnimationActive={!reducedMotion} animationDuration={600} animationEasing="ease-out">
+            <Bar dataKey="value" shape={Barra3D} fill={BARRA_3D.frente} isAnimationActive={!reducedMotion} animationDuration={600} animationEasing="ease-out">
               <LabelList
                 dataKey="value"
-                position="top"
-                content={narrow ? (p) => (data[p.index] && data[p.index].name === highlight && p.value ? (
-                  <text x={p.x + p.width / 2} y={p.y - 6} textAnchor="middle" fill={PALETTE.textPrimary} fontSize={11} fontFamily={FONT}>
-                    {compactBRL.format(p.value)}
-                  </text>
-                ) : null) : undefined}
-                formatter={(v) => (v ? compactBRL.format(v) : "")}
-                style={{ fill: PALETTE.textMuted, fontSize: 11, fontFamily: FONT, fontVariantNumeric: "tabular-nums" }}
+                content={(p) => {
+                  const destaque = data[p.index] && data[p.index].name === highlight;
+                  // Do mais completo ao mais curto; o "R$" pode sair porque o título já diz a moeda
+                  const semMoeda = (t) => t.replace(/R\$\s?/, "");
+                  const completo = formatBRL(p.value || 0);
+                  const compacto = compactBRL.format(p.value || 0);
+                  const opcoes = [completo, semMoeda(completo), compacto, semMoeda(compacto)];
+                  const texto = opcoes.find((t) => larguraCaixa(t) <= espacoColuna);
+                  if (!texto || narrow) return destaque ? <RotuloValor {...p} texto={compacto} /> : null;
+                  return <RotuloValor {...p} texto={texto} />;
+                }}
               />
-              {data.map((d) => (
-                <Cell key={d.name} fill={d.name === highlight ? PALETTE.accent : PALETTE.barMuted} />
-              ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>

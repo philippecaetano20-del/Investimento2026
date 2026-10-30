@@ -569,14 +569,14 @@ function Dashboard({ user, onLogout }) {
 
             <div className="grade">
               <ChartCard
-                title="Aportes por mês"
+                title="Aportes por mês (R$)"
                 data={porMesCompleto}
                 highlight={ultimoMesComAporte ? ultimoMesComAporte.name : null}
                 tickFormatter={(v) => v.split("/")[0]}
               />
               <PieChartCard title="Por classe" data={porTipo} colorMap={TIPO_COLORS} />
               <AtivosList title="Por ativo" data={porAtivo} />
-              <ChartCard title="Aportes por ano" data={porAno} highlight={anoSelecionado} />
+              <ChartCard title="Aportes por ano (R$)" data={porAno} highlight={anoSelecionado} />
             </div>
           </>
         )}
