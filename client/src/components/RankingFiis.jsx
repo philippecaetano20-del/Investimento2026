@@ -27,12 +27,12 @@ const inputStyle = {
   padding: "7px 9px",
   color: PALETTE.textPrimary,
   fontSize: 12.5,
-  fontFamily: "'IBM Plex Mono', monospace",
+  fontFamily: "'Hanken Grotesk', sans-serif",
   width: "100%",
 };
 
 const fieldLabel = {
-  fontSize: 10,
+  fontSize: 11.5,
   fontWeight: 600,
   letterSpacing: "0.05em",
   textTransform: "uppercase",
@@ -142,11 +142,11 @@ export function RankingFiis({ ativosList }) {
               gap: 4,
               background: "transparent",
               border: `1px solid ${PALETTE.line}`,
-              color: PALETTE.gold,
+              color: PALETTE.accent,
               borderRadius: 6,
               padding: "5px 10px",
               fontSize: 11.5,
-              fontFamily: "'Manrope', sans-serif",
+              fontFamily: "'Hanken Grotesk', sans-serif",
               cursor: "pointer",
             }}
           >
@@ -243,11 +243,11 @@ export function RankingFiis({ ativosList }) {
                         border: "none",
                         cursor: "pointer",
                         padding: 0,
-                        fontSize: 10,
-                        fontFamily: "'Manrope', sans-serif",
+                        fontSize: 11.5,
+                        fontFamily: "'Hanken Grotesk', sans-serif",
                         fontWeight: 600,
                         letterSpacing: "0.04em",
-                        color: ativo ? PALETTE.gold : PALETTE.textMuted,
+                        color: ativo ? PALETTE.accent : PALETTE.textMuted,
                         textTransform: "uppercase",
                       }}
                     >
@@ -273,12 +273,12 @@ export function RankingFiis({ ativosList }) {
                         gap: 8,
                         padding: "10px 14px",
                         borderBottom: i < visiveis.length - 1 ? `1px dashed ${PALETTE.line}` : "none",
-                        borderLeft: naCarteira ? `2px solid ${PALETTE.gold}` : "2px solid transparent",
+                        borderLeft: naCarteira ? `2px solid ${PALETTE.accent}` : "2px solid transparent",
                         fontSize: 12.5,
                       }}
                     >
                       <div className="mono" style={{ fontWeight: 700, display: "flex", alignItems: "center", gap: 4 }}>
-                        {naCarteira && <Star size={10} color={PALETTE.gold} fill={PALETTE.gold} />}
+                        {naCarteira && <Star size={10} color={PALETTE.accent} fill={PALETTE.accent} />}
                         {it.ticker}
                       </div>
                       <div style={{ fontSize: 11.5, color: PALETTE.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -321,7 +321,7 @@ export function RankingFiis({ ativosList }) {
                   borderRadius: 6,
                   padding: "7px 16px",
                   fontSize: 12.5,
-                  fontFamily: "'Manrope', sans-serif",
+                  fontFamily: "'Hanken Grotesk', sans-serif",
                   cursor: "pointer",
                 }}
               >

@@ -31,7 +31,7 @@ const inputStyle = {
   padding: "7px 9px",
   color: PALETTE.textPrimary,
   fontSize: 12.5,
-  fontFamily: "'IBM Plex Mono', monospace",
+  fontFamily: "'Hanken Grotesk', sans-serif",
   textAlign: "right",
 };
 
@@ -42,7 +42,7 @@ const tickerInputStyle = {
   padding: "8px 10px",
   color: PALETTE.textPrimary,
   fontSize: 13,
-  fontFamily: "'IBM Plex Mono', monospace",
+  fontFamily: "'Hanken Grotesk', sans-serif",
   width: 160,
 };
 
@@ -50,12 +50,12 @@ const addBtnStyle = {
   display: "flex",
   alignItems: "center",
   gap: 6,
-  background: PALETTE.gold,
-  color: "#1A1406",
+  background: PALETTE.accent,
+  color: PALETTE.onAccent,
   border: "none",
   borderRadius: 6,
   padding: "8px 14px",
-  fontFamily: "'Manrope', sans-serif",
+  fontFamily: "'Hanken Grotesk', sans-serif",
   fontWeight: 600,
   fontSize: 13,
   cursor: "pointer",
@@ -68,7 +68,7 @@ const affixStyle = {
   transform: "translateY(-50%)",
   fontSize: 12,
   color: PALETTE.textMuted,
-  fontFamily: "'IBM Plex Mono', monospace",
+  fontFamily: "'Hanken Grotesk', sans-serif",
   pointerEvents: "none",
 };
 
@@ -140,7 +140,7 @@ function PercentField({ value, onChange }) {
 
 function fieldLabel(text, extra) {
   return (
-    <div style={{ fontSize: 10, fontFamily: "'Manrope', sans-serif", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: PALETTE.textMuted, marginBottom: 4, ...extra }}>
+    <div style={{ fontSize: 11.5, fontFamily: "'Hanken Grotesk', sans-serif", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", color: PALETTE.textMuted, marginBottom: 4, ...extra }}>
       {text}
     </div>
   );
@@ -149,8 +149,8 @@ function fieldLabel(text, extra) {
 function thStyle(align) {
   return {
     padding: "8px 10px",
-    fontSize: 10,
-    fontFamily: "'Manrope', sans-serif",
+    fontSize: 11.5,
+    fontFamily: "'Hanken Grotesk', sans-serif",
     fontWeight: 600,
     letterSpacing: "0.04em",
     textTransform: "uppercase",
@@ -174,7 +174,7 @@ function upsideBadge(v) {
         display: "inline-block",
         fontWeight: 700,
         fontSize: 13,
-        color: "#0E1522",
+        color: PALETTE.bg,
         background: positivo ? PALETTE.emerald : PALETTE.crimson,
         borderRadius: 5,
         padding: "3px 10px",
@@ -385,11 +385,11 @@ export function ValuationDcfTab() {
                           flex: 1,
                           padding: "7px 0",
                           fontSize: 12,
-                          fontFamily: "'IBM Plex Mono', monospace",
-                          border: `1px solid ${r.anos === n ? PALETTE.gold : PALETTE.line}`,
+                          fontFamily: "'Hanken Grotesk', sans-serif",
+                          border: `1px solid ${r.anos === n ? PALETTE.accent : PALETTE.line}`,
                           borderRadius: 5,
-                          background: r.anos === n ? "rgba(212,169,79,0.12)" : PALETTE.bg,
-                          color: r.anos === n ? PALETTE.gold : PALETTE.textPrimary,
+                          background: r.anos === n ? "rgba(154, 167, 255,0.12)" : PALETTE.bg,
+                          color: r.anos === n ? PALETTE.accent : PALETTE.textPrimary,
                           cursor: "pointer",
                         }}
                       >
@@ -402,7 +402,7 @@ export function ValuationDcfTab() {
 
               <div style={{ fontSize: 12, color: PALETTE.textMuted, marginBottom: 14 }}>
                 Taxa Esperada de Crescimento (g) = ROE × (1 − Payout) ={" "}
-                <span className="mono" style={{ color: PALETTE.gold, fontWeight: 700 }}>
+                <span className="mono" style={{ color: PALETTE.accent, fontWeight: 700 }}>
                   {r.g.toFixed(2)}%
                 </span>{" "}
                 — usada só nos anos projetados. O valor terminal usa a Taxa de Crescimento na Perpetuidade (
@@ -453,7 +453,7 @@ export function ValuationDcfTab() {
                 </div>
                 <div>
                   {fieldLabel("Preço Justo")}
-                  <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: PALETTE.gold }}>
+                  <div className="mono" style={{ fontSize: 14, fontWeight: 700, color: PALETTE.accent }}>
                     {r.precoJusto != null ? formatBRL(r.precoJusto) : "—"}
                   </div>
                 </div>

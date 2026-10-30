@@ -14,7 +14,6 @@ export function AuthShell({ children }) {
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,500;0,600;1,500&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
         .login-photo-bg {
           position: absolute; inset: 0;
           background-image: url('/login-bg.webp');
@@ -24,32 +23,27 @@ export function AuthShell({ children }) {
         .login-scrim {
           position: absolute; inset: 0;
           background:
-            radial-gradient(ellipse 620px 480px at 50% 50%, rgba(6,9,16,0.55), transparent 62%),
-            linear-gradient(180deg, rgba(6,9,16,0.62) 0%, rgba(6,9,16,0.42) 30%, rgba(6,9,16,0.58) 70%, rgba(6,9,16,0.88) 100%);
-        }
-        .login-grain {
-          position: absolute; inset: 0; pointer-events: none; opacity: 0.035; mix-blend-mode: overlay;
-          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+            radial-gradient(ellipse 620px 480px at 50% 50%, rgba(8, 9, 11,0.55), transparent 62%),
+            linear-gradient(180deg, rgba(8, 9, 11,0.62) 0%, rgba(8, 9, 11,0.42) 30%, rgba(8, 9, 11,0.58) 70%, rgba(8, 9, 11,0.88) 100%);
         }
         .login-fade { animation: loginFade 0.7s cubic-bezier(0.16,1,0.3,1) both; }
         @keyframes loginFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .login-input:focus { outline: none !important; border-color: ${PALETTE.gold} !important; box-shadow: 0 0 0 3px rgba(212,169,79,0.15); }
+        .login-input:focus { outline: none !important; border-color: ${PALETTE.accent} !important; box-shadow: 0 0 0 3px rgba(154, 167, 255,0.15); }
       `}</style>
 
       <div className="login-photo-bg" />
       <div className="login-scrim" />
-      <div className="login-grain" />
 
       <div style={{ position: "relative", zIndex: 1, padding: "24px 32px" }}>
         <div
           className="login-fade"
           style={{
-            fontFamily: "'Fraunces', serif",
+            fontFamily: "'Hanken Grotesk', sans-serif",
             fontWeight: 600,
             fontStyle: "italic",
             fontSize: 26,
             letterSpacing: "0.02em",
-            color: PALETTE.gold,
+            color: PALETTE.accent,
           }}
         >
           Investidor
@@ -65,19 +59,19 @@ export function AuthShell({ children }) {
 
 export const authInputStyle = {
   width: "100%",
-  background: "rgba(6, 9, 16, 0.55)",
+  background: "rgba(8, 9, 11, 0.55)",
   border: "1px solid rgba(255,255,255,0.12)",
   borderRadius: 6,
   padding: "13px 14px",
   color: "#EDEFF4",
   fontSize: 14,
-  fontFamily: "'Manrope', sans-serif",
+  fontFamily: "'Hanken Grotesk', sans-serif",
 };
 
 export const authCardStyle = {
   width: "100%",
   maxWidth: 380,
-  background: "rgba(22, 31, 48, 0.82)",
+  background: "rgba(22, 23, 26, 0.86)",
   backdropFilter: "blur(8px)",
   border: `1px solid ${PALETTE.line}`,
   borderRadius: 12,

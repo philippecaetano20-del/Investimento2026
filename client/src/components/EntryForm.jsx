@@ -8,7 +8,7 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
   function set(field) {
     return (e) => setForm({ ...form, [field]: e.target.value });
   }
-  const label = { fontSize: 11, color: PALETTE.textMuted, marginBottom: 4, display: "block", fontFamily: "Manrope, sans-serif", letterSpacing: "0.04em" };
+  const label = { fontSize: 13, color: PALETTE.textMuted, marginBottom: 6, display: "block", fontFamily: "inherit" };
   const input = {
     width: "100%",
     background: PALETTE.bg,
@@ -52,7 +52,7 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
   }
   const readonlyMoneyStyle = (valor) => ({
     ...moneyInput,
-    color: valor < 0 ? PALETTE.crimsonText : PALETTE.gold,
+    color: valor < 0 ? PALETTE.crimsonText : PALETTE.accent,
     fontWeight: 600,
     cursor: "not-allowed",
   });
@@ -65,7 +65,7 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(6, 9, 16, 0.6)",
+        background: "rgba(8, 9, 11, 0.6)",
         backdropFilter: "blur(2px)",
         display: "flex",
         alignItems: "center",
@@ -142,7 +142,7 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
                   <option value="Sim">Sim</option>
                 </select>
                 {saque && (
-                  <div style={{ fontSize: 10.5, color: PALETTE.textMuted, marginTop: 4 }}>
+                  <div style={{ fontSize: 11.5, color: PALETTE.textMuted, marginTop: 4 }}>
                     O valor sai da Renda Fixa sem alterar o total investido. Na compra da outra classe, marque "Está Reinvestido?" = Sim.
                   </div>
                 )}
@@ -188,7 +188,7 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
             <button
               type="button"
               onClick={onCancel}
-              style={{ background: "transparent", border: `1px solid ${PALETTE.line}`, color: PALETTE.textMuted, borderRadius: 6, padding: "8px 14px", fontSize: 13, cursor: "pointer", fontFamily: "Manrope, sans-serif" }}
+              style={{ background: "transparent", border: `1px solid ${PALETTE.line}`, color: PALETTE.textMuted, borderRadius: 6, padding: "8px 14px", fontSize: 13, cursor: "pointer", fontFamily: "'Hanken Grotesk', sans-serif" }}
             >
               Cancelar
             </button>
@@ -197,15 +197,15 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
               onClick={onSubmit}
               disabled={saving}
               style={{
-                background: PALETTE.gold,
-                color: "#1A1406",
+                background: PALETTE.accent,
+                color: PALETTE.onAccent,
                 border: "none",
                 borderRadius: 6,
                 padding: "8px 16px",
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: saving ? "default" : "pointer",
-                fontFamily: "Manrope, sans-serif",
+                fontFamily: "'Hanken Grotesk', sans-serif",
                 opacity: saving ? 0.7 : 1,
               }}
             >

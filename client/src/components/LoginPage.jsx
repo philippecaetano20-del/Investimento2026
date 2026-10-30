@@ -32,7 +32,7 @@ export function LoginPage({ onLoggedIn }) {
   return (
     <AuthShell>
       <form onSubmit={handleSubmit} className="login-fade" style={{ ...authCardStyle, animationDelay: "0.08s" }}>
-        <div style={{ fontFamily: "'Fraunces', serif", fontSize: 24, fontWeight: 500, color: PALETTE.textPrimary, marginBottom: 22 }}>
+        <div style={{ fontFamily: "'Hanken Grotesk', sans-serif", fontSize: 24, fontWeight: 500, color: PALETTE.textPrimary, marginBottom: 22 }}>
           Entrar
         </div>
 
@@ -70,12 +70,12 @@ export function LoginPage({ onLoggedIn }) {
             alignItems: "center",
             justifyContent: "center",
             gap: 8,
-            background: PALETTE.gold,
-            color: "#1A1406",
+            background: PALETTE.accent,
+            color: PALETTE.onAccent,
             border: "none",
             borderRadius: 8,
             padding: "12px 16px",
-            fontFamily: "'Manrope', sans-serif",
+            fontFamily: "'Hanken Grotesk', sans-serif",
             fontWeight: 700,
             fontSize: 14,
             cursor: loading ? "default" : "pointer",

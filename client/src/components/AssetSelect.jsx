@@ -54,7 +54,7 @@ export function AssetSelect({ value, onChange, options, inputStyle, id }) {
               style={{
                 padding: "8px 10px",
                 fontSize: 13,
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Hanken Grotesk', sans-serif",
                 color: PALETTE.textPrimary,
                 cursor: "pointer",
                 borderBottom: `1px solid ${PALETTE.surfaceAlt}`,

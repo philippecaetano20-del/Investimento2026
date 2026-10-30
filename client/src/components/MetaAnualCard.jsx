@@ -1,16 +1,13 @@
 import React, { useState } from "react";
-import { ResponsiveContainer, PieChart } from "recharts";
-import { Pencil, Check, X, Target } from "lucide-react";
+import { Pencil, Check, X } from "lucide-react";
 import { PALETTE } from "../constants.js";
 import { formatBRL, parseNumBR } from "../utils.js";
-import { renderPie2D, usePrefersReducedMotion } from "./charts.jsx";
-import { useCountUp } from "../useCountUp.js";
 
 const iconBtnStyle = {
   background: "transparent",
   border: "none",
   cursor: "pointer",
-  padding: 8,
+  padding: 6,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -18,8 +15,8 @@ const iconBtnStyle = {
   borderRadius: 6,
 };
 
+/** Célula "Meta do ano" da faixa de resumo do Painel: progresso + edição inline. */
 export function MetaAnualCard({ ano, investidoAno, meta, onSaveMeta }) {
-  const reducedMotion = usePrefersReducedMotion();
   const [editing, setEditing] = useState(false);
   const [valorEdit, setValorEdit] = useState("");
   const [saving, setSaving] = useState(false);
@@ -39,7 +36,7 @@ export function MetaAnualCard({ ano, investidoAno, meta, onSaveMeta }) {
   async function confirmEdit() {
     const valor = parseNumBR(valorEdit);
     if (!valor || valor <= 0) {
-      setEditError("Informe um valor válido.");
+      setEditError("Informe um valor maior que zero.");
       return;
     }
     setSaving(true);
@@ -57,151 +54,84 @@ export function MetaAnualCard({ ano, investidoAno, meta, onSaveMeta }) {
   const restante = meta - investidoAno;
   const pct = semMeta ? 0 : Math.max(0, Math.min(100, (investidoAno / meta) * 100));
   const atingida = !semMeta && restante <= 0;
-  const investidoAnimado = useCountUp(investidoAno);
-  const restanteAnimado = useCountUp(Math.abs(restante));
-  const pctAnimado = useCountUp(pct);
-  const pieData = [
-    { name: "Investido", value: Math.min(investidoAno, meta || 0) },
-    { name: "Ainda resta", value: Math.max(0, restante) },
-  ];
-  const pieColors = [PALETTE.emerald, PALETTE.crimson];
 
   return (
-    <div
-      className="card-surface"
-      style={{
-        background: PALETTE.surface,
-        border: `1px solid ${PALETTE.line}`,
-        borderRadius: 10,
-        padding: "18px 20px",
-        marginBottom: 28,
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 20,
-        alignItems: "center",
-      }}
-    >
-      <div style={{ flex: "1 1 320px", minWidth: 280 }}>
-        <div className="display" style={{ fontSize: 15, fontWeight: 500, marginBottom: 14, color: PALETTE.textPrimary }}>
-          Meta
-        </div>
-
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 24, marginBottom: 14 }}>
-          <div>
-            <div style={{ fontSize: 10.5, color: PALETTE.textMuted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
-              META {ano}
-            </div>
-            {editing ? (
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <input
-                    autoFocus
-                    value={valorEdit}
-                    onChange={(e) => {
-                      setValorEdit(e.target.value);
-                      if (editError) setEditError("");
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") confirmEdit();
-                      if (e.key === "Escape") cancelEdit();
-                    }}
-                    placeholder="0,00"
-                    className="mono"
-                    style={{
-                      width: 130,
-                      background: PALETTE.bg,
-                      border: `1px solid ${PALETTE.line}`,
-                      borderRadius: 5,
-                      padding: "4px 8px",
-                      color: PALETTE.textPrimary,
-                      fontSize: 15,
-                      fontWeight: 600,
-                    }}
-                  />
-                  <button onClick={confirmEdit} disabled={saving} style={iconBtnStyle} aria-label="Salvar meta">
-                    <Check size={15} color={PALETTE.emerald} />
-                  </button>
-                  <button onClick={cancelEdit} style={iconBtnStyle} aria-label="Cancelar edição">
-                    <X size={15} color={PALETTE.textMuted} />
-                  </button>
-                </div>
-                {editError && <div style={{ color: PALETTE.crimsonText, fontSize: 11, marginTop: 4 }}>{editError}</div>}
-              </div>
-            ) : (
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <div className="mono" style={{ fontSize: 18, fontWeight: 600, color: PALETTE.textPrimary }}>
-                  {semMeta ? "Não definida" : formatBRL(meta)}
-                </div>
-                <button onClick={startEdit} style={iconBtnStyle} aria-label={`Editar meta de ${ano}`}>
-                  <Pencil size={13} color={PALETTE.textMuted} />
-                </button>
-              </div>
-            )}
-          </div>
-          {!semMeta && (
-            <>
-              <div>
-                <div style={{ fontSize: 10.5, color: PALETTE.textMuted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
-                  Já investido
-                </div>
-                <div className="mono" style={{ fontSize: 18, fontWeight: 600, color: PALETTE.emerald }}>
-                  {formatBRL(investidoAnimado)}
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: 10.5, color: PALETTE.textMuted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
-                  {atingida ? "Meta batida, excedente" : "Ainda resta"}
-                </div>
-                <div className="mono" style={{ fontSize: 18, fontWeight: 600, color: atingida ? PALETTE.gold : PALETTE.crimsonText }}>
-                  {formatBRL(restanteAnimado)}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-
-        {semMeta ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 8, color: PALETTE.textMuted, fontSize: 12.5 }}>
-            <Target size={14} />
-            Defina uma meta para {ano} para acompanhar seu progresso.
-          </div>
-        ) : (
-          <>
-            <div style={{ background: PALETTE.bg, borderRadius: 999, height: 10, overflow: "hidden", border: `1px solid ${PALETTE.line}` }}>
-              <div
-                style={{
-                  width: `${pctAnimado}%`,
-                  height: "100%",
-                  background: atingida ? PALETTE.emerald : PALETTE.gold,
-                  borderRadius: 999,
-                }}
-              />
-            </div>
-            <div className="mono" style={{ fontSize: 11, color: PALETTE.textMuted, marginTop: 6, textAlign: "right" }}>
-              {pctAnimado.toFixed(1)}% da meta
-            </div>
-          </>
+    <div className="resumo-celula">
+      <div className="resumo-rotulo" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
+        <span>Meta de {ano}</span>
+        {!semMeta && !editing && (
+          <button onClick={startEdit} style={{ ...iconBtnStyle, margin: -6 }} aria-label={`Editar meta de ${ano}`} title="Editar meta">
+            <Pencil size={13} color={PALETTE.textMuted} />
+          </button>
         )}
       </div>
 
-      {!semMeta && (
-        <div style={{ flex: "0 0 220px", width: 220 }}>
-          <ResponsiveContainer width="100%" height={220}>
-            <PieChart>
-              {renderPie2D({ data: pieData, colors: pieColors, cyTop: 105, outerRadius: 78, showLabel: false, showTooltip: true, showLegend: false, animate: !reducedMotion })}
-            </PieChart>
-          </ResponsiveContainer>
-          <div style={{ display: "flex", justifyContent: "center", gap: 14, marginTop: -8 }}>
-            <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: PALETTE.textMuted }}>
-              <span style={{ width: 8, height: 8, borderRadius: 999, background: pieColors[0], display: "inline-block" }} />
-              Investido
-            </span>
-            <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: PALETTE.textMuted }}>
-              <span style={{ width: 8, height: 8, borderRadius: 999, background: pieColors[1], display: "inline-block" }} />
-              Resta
-            </span>
+      {editing ? (
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <input
+              autoFocus
+              value={valorEdit}
+              onChange={(e) => {
+                setValorEdit(e.target.value);
+                if (editError) setEditError("");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") confirmEdit();
+                if (e.key === "Escape") cancelEdit();
+              }}
+              placeholder="R$ 0,00"
+              inputMode="decimal"
+              aria-label={`Valor da meta de ${ano}`}
+              className="num"
+              style={{
+                width: "100%",
+                minWidth: 0,
+                background: PALETTE.bg,
+                border: `1px solid ${PALETTE.line}`,
+                borderRadius: 6,
+                padding: "6px 8px",
+                color: PALETTE.textPrimary,
+                fontSize: 15,
+                fontWeight: 600,
+              }}
+            />
+            <button onClick={confirmEdit} disabled={saving} style={iconBtnStyle} aria-label="Salvar meta">
+              <Check size={16} color={PALETTE.emerald} />
+            </button>
+            <button onClick={cancelEdit} style={iconBtnStyle} aria-label="Cancelar edição">
+              <X size={16} color={PALETTE.textMuted} />
+            </button>
           </div>
+          {editError && <div style={{ color: PALETTE.crimsonText, fontSize: 12, marginTop: 4 }}>{editError}</div>}
         </div>
+      ) : semMeta ? (
+        <>
+          <button type="button" className="link-btn" onClick={startEdit} style={{ fontSize: 15, marginTop: 2 }}>
+            Definir meta
+          </button>
+          <div className="resumo-nota">Acompanhe quanto falta para o ano.</div>
+        </>
+      ) : (
+        <>
+          <div className="resumo-valor num">
+            {pct.toFixed(0)}%
+            <span style={{ fontSize: 13, fontWeight: 500, color: PALETTE.textMuted, marginLeft: 8 }}>de {formatBRL(meta)}</span>
+          </div>
+          <div
+            role="progressbar"
+            aria-valuenow={Math.round(pct)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={`Progresso da meta de ${ano}`}
+            style={{ height: 4, background: PALETTE.line, borderRadius: 999, overflow: "hidden", margin: "10px 0 6px" }}
+          >
+            <div style={{ width: "100%", height: "100%", background: atingida ? PALETTE.emerald : PALETTE.accent, borderRadius: 999, transform: `scaleX(${pct / 100})`, transformOrigin: "left", transition: "transform 0.6s cubic-bezier(0.16,1,0.3,1)" }} />
+          </div>
+          <div className="resumo-nota num">
+            {atingida ? `Meta batida, ${formatBRL(-restante)} acima` : `Faltam ${formatBRL(restante)}`}
+          </div>
+        </>
       )}
     </div>
   );

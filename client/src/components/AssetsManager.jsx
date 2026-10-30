@@ -105,7 +105,7 @@ export function AssetsManager({ ativosList, onAdd, onRename, onRemove }) {
             padding: "9px 12px",
             color: PALETTE.textPrimary,
             fontSize: 13,
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Hanken Grotesk', sans-serif",
           }}
         />
         <button
@@ -116,12 +116,12 @@ export function AssetsManager({ ativosList, onAdd, onRename, onRemove }) {
             display: "flex",
             alignItems: "center",
             gap: 6,
-            background: PALETTE.gold,
-            color: "#1A1406",
+            background: PALETTE.accent,
+            color: PALETTE.onAccent,
             border: "none",
             borderRadius: 6,
             padding: "9px 16px",
-            fontFamily: "'Manrope', sans-serif",
+            fontFamily: "'Hanken Grotesk', sans-serif",
             fontWeight: 600,
             fontSize: 13,
             cursor: busy ? "default" : "pointer",
@@ -142,7 +142,7 @@ export function AssetsManager({ ativosList, onAdd, onRename, onRemove }) {
               key={a}
               style={{
                 background: PALETTE.surfaceAlt,
-                border: `1px solid ${isEditing ? PALETTE.gold : PALETTE.line}`,
+                border: `1px solid ${isEditing ? PALETTE.accent : PALETTE.line}`,
                 borderRadius: 6,
                 padding: "8px 10px",
               }}
@@ -169,7 +169,7 @@ export function AssetsManager({ ativosList, onAdd, onRename, onRemove }) {
                       padding: "4px 6px",
                       color: PALETTE.textPrimary,
                       fontSize: 12.5,
-                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontFamily: "'Hanken Grotesk', sans-serif",
                     }}
                   />
                   <button onClick={() => confirmEdit(a)} style={iconBtnStyle} aria-label="Salvar novo nome">

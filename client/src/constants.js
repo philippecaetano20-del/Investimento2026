@@ -1,20 +1,22 @@
+// Grafite neutro: a cor fica reservada para significado (destaque, ganho, perda, classe)
 export const PALETTE = {
-  bg: "#0E1522",
-  surface: "#161F30",
-  surfaceAlt: "#1C2740",
-  line: "#2A3652",
-  gold: "#D4A94F",
-  emerald: "#3FAE7A",
-  crimson: "#B8503F",
-  // Lighter tint of `crimson` for text/icons on dark backgrounds — the base
-  // crimson only hits ~3.3:1 there, below the 4.5:1 WCAG AA floor for text.
-  // Keep `crimson` itself for fills/borders/buttons where it sits behind light text.
-  crimsonText: "#D97A5C",
-  textPrimary: "#EDEFF4",
-  textMuted: "#8B96AA",
+  bg: "#0F1012",
+  surface: "#16171A",
+  surfaceAlt: "#1D1E22",
+  line: "#2A2B30",
+  accent: "#9AA7FF",
+  onAccent: "#0F1012",
+  emerald: "#5BC08C",
+  crimson: "#C9574A",
+  // Tom mais claro de `crimson` para texto/ícones sobre fundo escuro (≥4.5:1);
+  // `crimson` fica para preenchimentos e bordas atrás de texto claro.
+  crimsonText: "#EB8A7A",
+  textPrimary: "#ECECEE",
+  textMuted: "#9A9CA5",
+  barMuted: "#3A3C44",
 };
 
-export const BAR_COLORS = ["#D4A94F", "#3FAE7A", "#5B8CC9", "#B8503F", "#8B6FC9", "#4FA8B8", "#C98F4F", "#6FA8DC"];
+export const BAR_COLORS = ["#9AA7FF", "#5BC08C", "#E3B46A", "#D98AA6", "#6CC3E0", "#B59CF0", "#C7C2B8", "#E0876A"];
 
 export const TIPOS = ["Ação", "FII", "ETF", "Renda Fixa", "Tesouro Direto", "Cripto", "Outro"];
 

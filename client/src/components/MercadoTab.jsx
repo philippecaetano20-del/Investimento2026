@@ -131,7 +131,7 @@ export function MercadoTab({ ativosList }) {
               padding: "10px 12px 10px 36px",
               color: PALETTE.textPrimary,
               fontSize: 13,
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'Hanken Grotesk', sans-serif",
             }}
           />
         </div>
@@ -157,7 +157,7 @@ export function MercadoTab({ ativosList }) {
                 style={{
                   padding: "8px 12px",
                   fontSize: 13,
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: "'Hanken Grotesk', sans-serif",
                   color: PALETTE.textPrimary,
                   cursor: "pointer",
                   borderBottom: `1px solid ${PALETTE.surfaceAlt}`,
@@ -206,7 +206,7 @@ export function MercadoTab({ ativosList }) {
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: 20 }}>
             <div>
-              <div className="mono" style={{ fontSize: 11, color: PALETTE.gold, letterSpacing: "0.1em", marginBottom: 4 }}>
+              <div className="mono" style={{ fontSize: 11, color: PALETTE.accent, letterSpacing: "0.1em", marginBottom: 4 }}>
                 {quote.symbol}
               </div>
               <div className="display" style={{ fontSize: 18, fontWeight: 500 }}>
@@ -249,9 +249,9 @@ export function MercadoTab({ ativosList }) {
                 key={r.key}
                 onClick={() => trocarRange(r.key)}
                 style={{
-                  background: range === r.key ? PALETTE.gold : "transparent",
-                  color: range === r.key ? "#1A1406" : PALETTE.textMuted,
-                  border: `1px solid ${range === r.key ? PALETTE.gold : PALETTE.line}`,
+                  background: range === r.key ? PALETTE.accent : "transparent",
+                  color: range === r.key ? PALETTE.onAccent : PALETTE.textMuted,
+                  border: `1px solid ${range === r.key ? PALETTE.accent : PALETTE.line}`,
                   borderRadius: 6,
                   padding: "4px 12px",
                   fontSize: 12,
@@ -276,7 +276,7 @@ export function MercadoTab({ ativosList }) {
                 <CartesianGrid strokeDasharray="3 3" stroke={PALETTE.line} vertical={false} />
                 <XAxis
                   dataKey="label"
-                  tick={{ fill: PALETTE.textMuted, fontSize: 10, fontFamily: "IBM Plex Mono" }}
+                  tick={{ fill: PALETTE.textMuted, fontSize: 11.5, fontFamily: "'Hanken Grotesk', sans-serif" }}
                   axisLine={{ stroke: PALETTE.line }}
                   tickLine={false}
                   minTickGap={30}
@@ -288,7 +288,7 @@ export function MercadoTab({ ativosList }) {
                     background: PALETTE.surfaceAlt,
                     border: `1px solid ${PALETTE.line}`,
                     borderRadius: 8,
-                    fontFamily: "IBM Plex Mono",
+                    fontFamily: "'Hanken Grotesk', sans-serif",
                     fontSize: 12,
                   }}
                   labelStyle={{ color: PALETTE.textPrimary }}
@@ -391,7 +391,7 @@ function WatchlistRow({ quote, selected, onClick, isLast }) {
             display: "inline-block",
             fontSize: 11,
             fontWeight: 700,
-            color: "#0E1522",
+            color: PALETTE.bg,
             background: cor,
             borderRadius: 5,
             padding: "1px 6px",
@@ -408,7 +408,7 @@ function WatchlistRow({ quote, selected, onClick, isLast }) {
 function MiniStat({ label, value }) {
   return (
     <div>
-      <div style={{ fontSize: 10, color: PALETTE.textMuted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+      <div style={{ fontSize: 11.5, color: PALETTE.textMuted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
         {label}
       </div>
       <div className="mono" style={{ fontSize: 13, fontWeight: 600, color: PALETTE.textPrimary }}>

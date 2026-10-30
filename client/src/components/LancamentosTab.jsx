@@ -128,11 +128,11 @@ export function LancamentosTab({
               alignItems: "center",
               gap: 6,
               background: "transparent",
-              color: PALETTE.gold,
-              border: `1px solid ${PALETTE.gold}`,
+              color: PALETTE.accent,
+              border: `1px solid ${PALETTE.accent}`,
               borderRadius: 6,
               padding: "8px 14px",
-              fontFamily: "'Manrope', sans-serif",
+              fontFamily: "'Hanken Grotesk', sans-serif",
               fontWeight: 600,
               fontSize: 13,
               cursor: exportando || sortedEntries.length === 0 ? "default" : "pointer",
@@ -147,12 +147,12 @@ export function LancamentosTab({
               display: "flex",
               alignItems: "center",
               gap: 6,
-              background: PALETTE.gold,
-              color: "#1A1406",
+              background: PALETTE.accent,
+              color: PALETTE.onAccent,
               border: "none",
               borderRadius: 6,
               padding: "8px 14px",
-              fontFamily: "'Manrope', sans-serif",
+              fontFamily: "'Hanken Grotesk', sans-serif",
               fontWeight: 600,
               fontSize: 13,
               cursor: "pointer",
@@ -175,11 +175,11 @@ export function LancamentosTab({
               gap: 4,
               background: "transparent",
               border: `1px solid ${PALETTE.line}`,
-              color: PALETTE.gold,
+              color: PALETTE.accent,
               borderRadius: 6,
               padding: "4px 10px",
               fontSize: 11.5,
-              fontFamily: "'Manrope', sans-serif",
+              fontFamily: "'Hanken Grotesk', sans-serif",
               cursor: "pointer",
             }}
           >
@@ -237,12 +237,10 @@ export function LancamentosTab({
                     alignItems: "center",
                     gap: 4,
                     justifyContent: col.align === "right" ? "flex-end" : "flex-start",
-                    fontSize: 10,
-                    fontFamily: "'Manrope', sans-serif",
-                    fontWeight: 600,
-                    letterSpacing: "0.04em",
+                    fontSize: 12,
+                    fontFamily: "'Hanken Grotesk', sans-serif",
+                    fontWeight: 500,
                     color: PALETTE.textMuted,
-                    textTransform: "uppercase",
                   }}
                 >
                   {col.filterable && col.align === "right" && (
@@ -276,53 +274,50 @@ export function LancamentosTab({
                   alignItems: "center",
                   gap: 10,
                   padding: "12px 16px",
-                  borderBottom: i < entriesFiltradas.length - 1 ? `1px dashed ${PALETTE.line}` : "none",
-                  fontSize: 13,
+                  borderBottom: i < entriesFiltradas.length - 1 ? `1px solid ${PALETTE.line}` : "none",
+                  fontSize: 14,
                 }}
               >
-                <div className="mono" style={{ color: PALETTE.textMuted, fontSize: 12 }}>
+                <div className="num" style={{ color: PALETTE.textMuted, fontSize: 13 }}>
                   {formatDateBR(e.data)}
                 </div>
-                <div className="mono" style={{ fontWeight: 600 }}>
+                <div style={{ fontWeight: 600 }}>
                   {e.nivel}
                 </div>
-                <div style={{ fontSize: 11.5, color: PALETTE.textMuted }}>
+                <div style={{ fontSize: 13, color: PALETTE.textMuted, display: "flex", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
                   {e.tipo}
                   {e.saque ? (
                     <span
                       style={{
-                        marginLeft: 6,
-                        padding: "1px 6px",
-                        borderRadius: 4,
-                        fontSize: 10,
+                        padding: "1px 7px",
+                        borderRadius: 999,
+                        fontSize: 11.5,
                         fontWeight: 600,
                         color: PALETTE.crimsonText,
-                        border: `1px solid ${PALETTE.crimsonText}`,
+                        background: "rgba(235, 138, 122, 0.12)",
                       }}
                     >
                       Saque
                     </span>
                   ) : null}
                 </div>
-                <div className="mono" style={{ textAlign: "right", fontSize: 12.5 }}>
+                <div className="num" style={{ textAlign: "right" }}>
                   {formatBRL(e.valorPago)}
                 </div>
-                <div className="mono" style={{ textAlign: "right", fontSize: 12.5, color: PALETTE.textMuted }}>
-                  {e.quantidade}
+                <div className="num" style={{ textAlign: "right", color: PALETTE.textMuted }}>
+                  {String(e.quantidade).replace(".", ",")}
                 </div>
-                <div className="mono" style={{ textAlign: "right", fontWeight: 600, color: e.valorInvestido < 0 ? PALETTE.crimsonText : PALETTE.textPrimary }}>
+                <div className="num" style={{ textAlign: "right", fontWeight: 600, color: e.valorInvestido < 0 ? PALETTE.crimsonText : PALETTE.textPrimary }}>
                   {formatBRL(e.valorInvestido)}
                 </div>
                 <div
-                  className="mono"
+                  className="num"
                   style={{
                     textAlign: "right",
-                    fontSize: 12.5,
-                    color: e.rentabilidade >= 0 ? PALETTE.emerald : PALETTE.crimsonText,
+                    color: !e.rentabilidade ? PALETTE.textMuted : e.rentabilidade > 0 ? PALETTE.emerald : PALETTE.crimsonText,
                   }}
                 >
-                  {e.rentabilidade >= 0 ? "+" : ""}
-                  {e.rentabilidade.toFixed(2)}%
+                  {e.rentabilidade ? `${e.rentabilidade > 0 ? "+" : ""}${e.rentabilidade.toFixed(2).replace(".", ",")}%` : "—"}
                 </div>
                 <div
                   className="row-actions"

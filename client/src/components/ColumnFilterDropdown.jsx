@@ -62,7 +62,7 @@ export function ColumnFilterDropdown({ options, format, selectedSet, onApply }) 
         style={{ background: "transparent", border: "none", cursor: "pointer", padding: 6, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5 }}
         aria-label="Filtrar"
       >
-        <Filter size={11} color={ativo ? PALETTE.gold : PALETTE.textMuted} />
+        <Filter size={11} color={ativo ? PALETTE.accent : PALETTE.textMuted} />
       </button>
       {open && (
         <div
@@ -78,7 +78,7 @@ export function ColumnFilterDropdown({ options, format, selectedSet, onApply }) 
             width: 230,
             boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
             padding: 10,
-            fontFamily: "'Manrope', sans-serif",
+            fontFamily: "'Hanken Grotesk', sans-serif",
           }}
         >
           <input
@@ -94,13 +94,13 @@ export function ColumnFilterDropdown({ options, format, selectedSet, onApply }) 
               color: PALETTE.textPrimary,
               fontSize: 12,
               marginBottom: 8,
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'Hanken Grotesk', sans-serif",
             }}
           />
           <div style={{ display: "flex", gap: 10, marginBottom: 6 }}>
             <button
               onClick={() => setTemp(new Set(options))}
-              style={{ background: "transparent", border: "none", color: PALETTE.gold, fontSize: 11, cursor: "pointer", padding: 0 }}
+              style={{ background: "transparent", border: "none", color: PALETTE.accent, fontSize: 11, cursor: "pointer", padding: 0 }}
             >
               Selecionar tudo
             </button>
@@ -126,7 +126,7 @@ export function ColumnFilterDropdown({ options, format, selectedSet, onApply }) 
                     fontSize: 12,
                     color: PALETTE.textPrimary,
                     cursor: "pointer",
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: "'Hanken Grotesk', sans-serif",
                   }}
                 >
                   <input type="checkbox" checked={temp.has(v)} onChange={() => toggleValue(v)} />
@@ -144,7 +144,7 @@ export function ColumnFilterDropdown({ options, format, selectedSet, onApply }) 
             </button>
             <button
               onClick={aplicar}
-              style={{ background: PALETTE.gold, border: "none", color: "#1A1406", borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+              style={{ background: PALETTE.accent, border: "none", color: PALETTE.onAccent, borderRadius: 6, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
             >
               Aplicar
             </button>

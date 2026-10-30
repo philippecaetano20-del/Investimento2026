@@ -74,19 +74,19 @@ export function TradeTab() {
               padding: "8px 10px 8px 32px",
               color: PALETTE.textPrimary,
               fontSize: 13,
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'Hanken Grotesk', sans-serif",
             }}
           />
         </div>
         <button
           onClick={() => buscar()}
           style={{
-            background: PALETTE.gold,
-            color: "#1A1406",
+            background: PALETTE.accent,
+            color: PALETTE.onAccent,
             border: "none",
             borderRadius: 6,
             padding: "8px 16px",
-            fontFamily: "'Manrope', sans-serif",
+            fontFamily: "'Hanken Grotesk', sans-serif",
             fontWeight: 600,
             fontSize: 13,
             cursor: "pointer",

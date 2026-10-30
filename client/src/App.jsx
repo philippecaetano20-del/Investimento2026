@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Wallet, LogOut, UserPlus, Copy, Check } from "lucide-react";
+import { LogOut, UserPlus, Copy, Check } from "lucide-react";
 import { PALETTE } from "./constants.js";
 import { formatBRL, monthLabel, emptyForm, parseNumBR } from "./utils.js";
 import { api, getToken, clearToken, setUnauthorizedHandler } from "./api.js";
 import { useCountUp } from "./useCountUp.js";
 import { HISTORICO_ANOS_ANTERIORES, TIPO_COLORS } from "./constants.js";
-import { ChartCard, PieChartCard } from "./components/charts.jsx";
+import { ChartCard, PieChartCard, AtivosList } from "./components/charts.jsx";
 import { MetaAnualCard } from "./components/MetaAnualCard.jsx";
 import { TabButton } from "./components/TabButton.jsx";
 import { LancamentosTab } from "./components/LancamentosTab.jsx";
@@ -292,187 +292,182 @@ function Dashboard({ user, onLogout }) {
     [entries]
   );
 
+  const hoje = new Date();
+  const anoEhAtual = anoSelecionado === String(hoje.getFullYear());
+  const mesAtualKey = `${anoSelecionado}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
+  // Ano corrente: o mês de hoje (mesmo sem aporte). Outros anos: o último mês com aporte.
+  const mesEmFoco = anoEhAtual
+    ? porMes.find((m) => m.key === mesAtualKey) || { key: mesAtualKey, name: monthLabel(mesAtualKey), value: 0 }
+    : porMes[porMes.length - 1] || null;
+  // Série do gráfico com todos os meses (até o atual, no ano corrente), para os meses sem aporte aparecerem
+  const ultimoMesDoGrafico = anoEhAtual ? hoje.getMonth() + 1 : porMes.length ? 12 : 0;
+  const porMesCompleto = Array.from({ length: ultimoMesDoGrafico }, (_, i) => {
+    const key = `${anoSelecionado}-${String(i + 1).padStart(2, "0")}`;
+    return porMes.find((m) => m.key === key) || { key, name: monthLabel(key), value: 0 };
+  });
+  const ultimoMesComAporte = porMes[porMes.length - 1];
+  const aportadoNosMeses = porMes.reduce((s, m) => s + m.value, 0);
+  const mediaMensal = porMes.length ? aportadoNosMeses / porMes.length : 0;
+
   return (
-    <div
-      style={{
-        background: PALETTE.bg,
-        backgroundImage: `radial-gradient(ellipse 900px 520px at 12% -12%, rgba(212,169,79,0.11), transparent 60%),
-          radial-gradient(ellipse 720px 520px at 105% 0%, rgba(63,174,122,0.07), transparent 55%),
-          repeating-linear-gradient(180deg, rgba(255,255,255,0.014) 0px, rgba(255,255,255,0.014) 1px, transparent 1px, transparent 34px)`,
-        backgroundAttachment: "fixed",
-        color: PALETTE.textPrimary,
-        minHeight: "100%",
-        fontFamily: "'Manrope', sans-serif",
-        padding: "32px 20px 60px",
-        position: "relative",
-      }}
-    >
+    <div className="app">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,500;0,600;1,500&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
         * { box-sizing: border-box; }
-        html, body, #root { height: 100%; margin: 0; }
-        .mono { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
-        .display { font-family: 'Fraunces', serif; }
-        input, select { font-family: 'IBM Plex Mono', monospace; }
-        ::placeholder { color: #5C6884; }
-        .row-actions { opacity: 0.5; }
-        .ledger-row:hover .row-actions { opacity: 1; }
-        @media (hover: none) {
-          .row-actions { opacity: 1; }
+        html, body, #root { min-height: 100%; margin: 0; }
+        body { -webkit-font-smoothing: antialiased; }
+        .app {
+          background: ${PALETTE.bg};
+          color: ${PALETTE.textPrimary};
+          min-height: 100vh;
+          font-family: 'Hanken Grotesk', sans-serif;
+          padding: 24px 20px 64px;
         }
+        .app-inner { max-width: 1240px; margin: 0 auto; }
+        ::selection { background: rgba(154, 167, 255, 0.32); color: ${PALETTE.textPrimary}; }
+        * { scrollbar-color: ${PALETTE.line} transparent; scrollbar-width: thin; }
+        input, select, textarea { font-family: 'Hanken Grotesk', sans-serif; font-variant-numeric: tabular-nums; caret-color: ${PALETTE.accent}; }
+        ::placeholder { color: #6E717B; }
 
-        .grain-overlay {
-          position: fixed;
-          inset: 0;
-          pointer-events: none;
-          opacity: 0.035;
-          z-index: 0;
-          mix-blend-mode: overlay;
-          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-        }
+        /* Números sempre com algarismos de largura fixa, para colunas alinharem */
+        .num, .mono { font-family: 'Hanken Grotesk', sans-serif; font-variant-numeric: tabular-nums; }
+        .display { font-family: 'Hanken Grotesk', sans-serif; font-weight: 600; letter-spacing: -0.015em; }
 
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-        .reveal { animation: fadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
-        .reveal-1 { animation-delay: 0.02s; }
-        .reveal-2 { animation-delay: 0.1s; }
-        .reveal-3 { animation-delay: 0.18s; }
-        @media (prefers-reduced-motion: reduce) { .reveal { animation: none; } }
+        .row-actions { opacity: 0.7; }
+        .ledger-row:hover .row-actions, .ledger-row:focus-within .row-actions { opacity: 1; }
+        @media (hover: none) { .row-actions { opacity: 1; } }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .spin { animation: spin 0.8s linear infinite; }
 
-        @keyframes tabFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        .tab-fade { animation: tabFade 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        @media (prefers-reduced-motion: reduce) { .tab-fade { animation: none; } }
+        button { transition: background-color 0.15s ease, color 0.15s ease, filter 0.15s ease, transform 0.1s ease; }
+        button:not(:disabled):hover { filter: brightness(1.12); }
+        button:not(:disabled):active { transform: scale(0.98); }
+        .tab-btn:not([aria-current]):hover { color: ${PALETTE.textPrimary} !important; filter: none; }
 
-        @media (max-width: 640px) {
-          .tabs-scroll {
-            mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
-            -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent 100%);
-          }
-        }
-
-        .card-surface { transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
-        .card-surface:hover {
-          transform: translateY(-3px);
-          border-color: rgba(212, 169, 79, 0.4);
-          box-shadow: 0 16px 32px -14px rgba(0,0,0,0.55), 0 0 0 1px rgba(212, 169, 79, 0.06);
-        }
-
-        button { transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease; }
-        button:not(:disabled):hover { filter: brightness(1.1); }
-        button:not(:disabled):active { transform: scale(0.97); }
-
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
           outline: none !important;
-          border-color: ${PALETTE.gold} !important;
-          box-shadow: 0 0 0 3px rgba(212, 169, 79, 0.15);
+          border-color: ${PALETTE.accent} !important;
+          box-shadow: 0 0 0 3px rgba(154, 167, 255, 0.18);
+        }
+        button:focus-visible, a:focus-visible {
+          outline: 2px solid ${PALETTE.accent};
+          outline-offset: 2px;
         }
 
-        button:focus-visible, a:focus-visible {
-          outline: none;
-          box-shadow: 0 0 0 3px rgba(212, 169, 79, 0.35);
-          border-radius: 6px;
+        /* Cabeçalho */
+        .topo { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 28px; }
+        .topo h1 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin: 0; display: flex; align-items: center; gap: 10px; }
+        .usuario { display: flex; align-items: center; gap: 16px; font-size: 13px; color: ${PALETTE.textMuted}; }
+        .total { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; margin-bottom: 28px; }
+        .total-valor { font-size: clamp(30px, 6vw, 44px); font-weight: 600; letter-spacing: -0.025em; line-height: 1.05; }
+        .total-rotulo { font-size: 14px; color: ${PALETTE.textMuted}; }
+
+        /* Navegação em dois grupos */
+        .abas { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; padding-bottom: 16px; margin-bottom: 28px; border-bottom: 1px solid ${PALETTE.line}; }
+        .abas-grupo { display: flex; align-items: center; gap: 4px; overflow-x: auto; max-width: 100%; }
+        .abas-grupo-nome { font-size: 12px; font-weight: 500; color: ${PALETTE.textMuted}; margin-right: 8px; flex-shrink: 0; }
+
+        /* Painel */
+        .painel-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .painel-topo h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.015em; margin: 0; }
+        .resumo { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: ${PALETTE.line}; border: 1px solid ${PALETTE.line}; border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+        .resumo-celula { background: ${PALETTE.surface}; padding: 16px 20px 18px; min-width: 0; }
+        .resumo-rotulo { font-size: 13px; color: ${PALETTE.textMuted}; margin-bottom: 6px; min-height: 20px; }
+        .resumo-valor { font-size: 22px; font-weight: 600; letter-spacing: -0.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .resumo-nota { font-size: 12.5px; color: ${PALETTE.textMuted}; margin-top: 4px; }
+
+        .grade { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 20px; }
+        .panel { background: ${PALETTE.surface}; border: 1px solid ${PALETTE.line}; border-radius: 12px; padding: 18px 20px 20px; min-width: 0; }
+        .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+        .panel-title { font-size: 15px; font-weight: 600; margin: 0; letter-spacing: -0.005em; }
+        .panel-aside { font-size: 13px; color: ${PALETTE.textMuted}; }
+        .panel-empty { height: 180px; display: flex; align-items: center; justify-content: center; color: ${PALETTE.textMuted}; font-size: 13px; }
+
+        .ranking { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+        .ranking li { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr) auto; align-items: center; gap: 14px; font-size: 13.5px; }
+        .ranking-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ranking-trilho { height: 6px; background: ${PALETTE.bg}; border-radius: 999px; overflow: hidden; }
+        .ranking-trilho span { display: block; height: 100%; background: rgba(154, 167, 255, 0.7); border-radius: 999px; }
+        .ranking li:first-child .ranking-trilho span { background: ${PALETTE.accent}; }
+        .ranking-valor { text-align: right; color: ${PALETTE.textPrimary}; min-width: 96px; }
+        .link-btn { background: none; border: none; padding: 0; margin-top: 16px; color: ${PALETTE.accent}; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; text-underline-offset: 3px; }
+        .link-btn:hover { text-decoration: underline; filter: none; }
+
+        .classes { display: flex; flex-direction: column; gap: 14px; }
+        .classes-rosca { width: 100%; max-width: 220px; margin: 0 auto; }
+        .legenda { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+        .legenda li { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto auto; align-items: center; gap: 10px; font-size: 13.5px; }
+        .legenda-cor { width: 10px; height: 10px; border-radius: 3px; }
+        .legenda-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .legenda-pct { color: ${PALETTE.textMuted}; text-align: right; min-width: 48px; }
+        .legenda-valor { text-align: right; min-width: 92px; }
+
+        @media (max-width: 960px) {
+          .grade { grid-template-columns: minmax(0, 1fr); }
+          .resumo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 520px) {
+          .app { padding: 18px 16px 48px; }
+          .topo { flex-wrap: wrap; }
+          .abas { gap: 12px 20px; }
+          .abas-grupo { flex-wrap: wrap; row-gap: 6px; overflow: visible; }
+          .abas-grupo-nome { width: 100%; }
+          .tab-btn { padding: 7px 11px !important; }
+          .resumo-celula { padding: 14px 14px 16px; }
+          .resumo-valor { font-size: 19px; }
+          .ranking li { grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; }
+          .ranking-trilho { grid-column: 1 / -1; grid-row: 2; }
         }
       `}</style>
 
-      <div className="grain-overlay" />
+      <div className="app-inner">
+        <header className="topo">
+          <h1>
+            <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true">
+              <rect width="32" height="32" rx="8" fill={PALETTE.surfaceAlt} />
+              <rect x="7" y="17" width="4" height="8" rx="1" fill={PALETTE.textMuted} />
+              <rect x="14" y="12" width="4" height="13" rx="1" fill={PALETTE.textMuted} />
+              <rect x="21" y="7" width="4" height="18" rx="1" fill={PALETTE.accent} />
+            </svg>
+            Painel de Investimentos
+          </h1>
+          <div className="usuario">
+            <span>
+              Olá, <span style={{ color: PALETTE.textPrimary, fontWeight: 600 }}>{user.nome}</span>
+            </span>
+            <InviteButton />
+            <button
+              onClick={onLogout}
+              style={{ display: "flex", alignItems: "center", gap: 5, background: "transparent", border: "none", color: PALETTE.textMuted, cursor: "pointer", fontSize: 13, fontFamily: "inherit", padding: 0 }}
+            >
+              <LogOut size={14} /> Sair
+            </button>
+          </div>
+        </header>
 
-      <div style={{ maxWidth: 1400, margin: "0 auto", position: "relative", zIndex: 1 }}>
-        <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 14, marginBottom: 10, fontSize: 12 }}>
-          <span style={{ color: PALETTE.textMuted }}>
-            Olá, <span style={{ color: PALETTE.textPrimary, fontWeight: 600 }}>{user.nome}</span>
+        <div className="total">
+          <span className="total-valor num">{formatBRL(totalInvestidoAnimado)}</span>
+          <span className="total-rotulo">
+            investidos no total, em {entries.length} lançamento{entries.length !== 1 ? "s" : ""}
           </span>
-          <InviteButton />
-          <button
-            onClick={onLogout}
-            style={{ display: "flex", alignItems: "center", gap: 5, background: "transparent", border: "none", color: PALETTE.textMuted, cursor: "pointer", fontSize: 12, fontFamily: "'Manrope', sans-serif", padding: 0 }}
-          >
-            <LogOut size={13} /> Sair
-          </button>
         </div>
 
-        {/* Header */}
-        <div
-          className="reveal reveal-1"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-end",
-            flexWrap: "wrap",
-            gap: 16,
-            marginBottom: 28,
-            borderBottom: "1px solid transparent",
-            borderImage: `linear-gradient(90deg, ${PALETTE.gold}, ${PALETTE.line} 45%, ${PALETTE.line}) 1`,
-            paddingBottom: 24,
-          }}
-        >
-          <div>
-            <div
-              className="mono"
-              style={{
-                fontSize: 12,
-                letterSpacing: "0.18em",
-                color: PALETTE.gold,
-                textTransform: "uppercase",
-                marginBottom: 8,
-              }}
-            >
-              Carteira · Posição consolidada
+        <nav className="abas" aria-label="Seções">
+          {GRUPOS_ABAS.map((grupo) => (
+            <div key={grupo.nome} className="abas-grupo" role="group" aria-label={grupo.nome}>
+              <span className="abas-grupo-nome">{grupo.nome}</span>
+              {grupo.abas.map(([id, rotulo]) => (
+                <TabButton key={id} active={activeTab === id} onClick={() => setActiveTab(id)}>
+                  {rotulo}
+                </TabButton>
+              ))}
             </div>
-            <div className="display" style={{ fontSize: 30, fontWeight: 500, marginBottom: 4 }}>
-              Painel de Investimentos
-            </div>
-            <div style={{ fontSize: 13, color: PALETTE.textMuted }}>
-              {entries.length} lançamento{entries.length !== 1 ? "s" : ""} registrado
-              {entries.length !== 1 ? "s" : ""}
-            </div>
-          </div>
-          <div style={{ textAlign: "right" }}>
-            <div
-              className="mono"
-              style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6, fontSize: 11, color: PALETTE.textMuted, marginBottom: 4, letterSpacing: "0.1em" }}
-            >
-              <Wallet size={13} color={PALETTE.gold} />
-              TOTAL INVESTIDO
-            </div>
-            <div className="mono" style={{ fontSize: 34, fontWeight: 600, color: PALETTE.textPrimary }}>
-              {formatBRL(totalInvestidoAnimado)}
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div
-          className="reveal reveal-2 tabs-scroll"
-          style={{ display: "flex", gap: 4, marginBottom: 24, overflowX: "auto", overflowY: "hidden", WebkitOverflowScrolling: "touch" }}
-        >
-          <TabButton active={activeTab === "painel"} onClick={() => setActiveTab("painel")}>
-            Painel
-          </TabButton>
-          <TabButton active={activeTab === "lancamentos"} onClick={() => setActiveTab("lancamentos")}>
-            Lançamentos
-          </TabButton>
-          <TabButton active={activeTab === "ativos"} onClick={() => setActiveTab("ativos")}>
-            Ativos
-          </TabButton>
-          <TabButton active={activeTab === "mercado"} onClick={() => setActiveTab("mercado")}>
-            Mercado
-          </TabButton>
-          <TabButton active={activeTab === "trade"} onClick={() => setActiveTab("trade")}>
-            Trade
-          </TabButton>
-          <TabButton active={activeTab === "calculadora"} onClick={() => setActiveTab("calculadora")}>
-            Calculadora
-          </TabButton>
-          <TabButton active={activeTab === "valuation"} onClick={() => setActiveTab("valuation")}>
-            Valuation de Fluxo de Caixa
-          </TabButton>
-        </div>
+          ))}
+        </nav>
 
         {saveError && !loading && (
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-            <div style={{ color: PALETTE.crimsonText, fontSize: 12.5 }}>{saveError}</div>
+          <div role="alert" style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+            <div style={{ color: PALETTE.crimsonText, fontSize: 13 }}>{saveError}</div>
             <button
               onClick={loadData}
               style={{
@@ -481,9 +476,9 @@ function Dashboard({ user, onLogout }) {
                 color: PALETTE.crimsonText,
                 borderRadius: 6,
                 padding: "4px 10px",
-                fontSize: 12,
+                fontSize: 12.5,
                 cursor: "pointer",
-                fontFamily: "'Manrope', sans-serif",
+                fontFamily: "inherit",
                 flexShrink: 0,
               }}
             >
@@ -492,12 +487,11 @@ function Dashboard({ user, onLogout }) {
           </div>
         )}
 
-        <div className="tab-fade" key={activeTab}>
         {loading ? (
           <div style={{ color: PALETTE.textMuted, padding: 40, textAlign: "center" }}>
             <div>Carregando dados...</div>
             {slowLoading && (
-              <div style={{ fontSize: 12.5, marginTop: 10, color: PALETTE.textMuted, maxWidth: 380, marginLeft: "auto", marginRight: "auto" }}>
+              <div style={{ fontSize: 13, marginTop: 10, maxWidth: 380, marginLeft: "auto", marginRight: "auto" }}>
                 O servidor gratuito "dorme" após um tempo sem uso e pode levar até 50 segundos para acordar na
                 primeira visita. Só aguardar, já está carregando.
               </div>
@@ -530,7 +524,8 @@ function Dashboard({ user, onLogout }) {
           />
         ) : (
           <>
-            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+            <div className="painel-topo">
+              <h2>Resumo de {anoSelecionado}</h2>
               <select
                 value={anoSelecionado}
                 onChange={(e) => setAnoSelecionado(e.target.value)}
@@ -539,10 +534,9 @@ function Dashboard({ user, onLogout }) {
                   background: PALETTE.surface,
                   border: `1px solid ${PALETTE.line}`,
                   borderRadius: 8,
-                  padding: "9px 14px",
+                  padding: "7px 12px",
                   color: PALETTE.textPrimary,
                   fontSize: 14,
-                  fontFamily: "'IBM Plex Mono', monospace",
                   cursor: "pointer",
                 }}
               >
@@ -554,29 +548,47 @@ function Dashboard({ user, onLogout }) {
               </select>
             </div>
 
-            <MetaAnualCard ano={anoSelecionado} investidoAno={investidoAnoSelecionado} meta={meta} onSaveMeta={saveMeta} />
+            <div className="resumo">
+              <div className="resumo-celula">
+                <div className="resumo-rotulo">Aportado em {anoSelecionado}</div>
+                <div className="resumo-valor num">{formatBRL(investidoAnoSelecionado)}</div>
+              </div>
+              <div className="resumo-celula">
+                <div className="resumo-rotulo">{mesEmFoco ? `Aportado em ${mesEmFoco.name}` : "Aportado no mês"}</div>
+                <div className="resumo-valor num">{formatBRL(mesEmFoco ? mesEmFoco.value : 0)}</div>
+              </div>
+              <div className="resumo-celula">
+                <div className="resumo-rotulo">Média por mês</div>
+                <div className="resumo-valor num">{formatBRL(mediaMensal)}</div>
+                <div className="resumo-nota">
+                  {porMes.length} {porMes.length === 1 ? "mês" : "meses"} com aporte
+                </div>
+              </div>
+              <MetaAnualCard ano={anoSelecionado} investidoAno={investidoAnoSelecionado} meta={meta} onSaveMeta={saveMeta} />
+            </div>
 
-            {/* Charts */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 16,
-                marginBottom: 28,
-              }}
-            >
-              <ChartCard title="Por ativo" data={porAtivo} angledLabels />
+            <div className="grade">
+              <ChartCard
+                title="Aportes por mês"
+                data={porMesCompleto}
+                highlight={ultimoMesComAporte ? ultimoMesComAporte.name : null}
+                tickFormatter={(v) => v.split("/")[0]}
+              />
               <PieChartCard title="Por classe" data={porTipo} colorMap={TIPO_COLORS} />
-              <ChartCard title="Por mês" data={porMes} />
-              <ChartCard title="Por ano" data={porAno} />
+              <AtivosList title="Por ativo" data={porAtivo} />
+              <ChartCard title="Aportes por ano" data={porAno} highlight={anoSelecionado} />
             </div>
           </>
         )}
-        </div>
       </div>
     </div>
   );
 }
+
+const GRUPOS_ABAS = [
+  { nome: "Carteira", abas: [["painel", "Painel"], ["lancamentos", "Lançamentos"], ["ativos", "Ativos"]] },
+  { nome: "Ferramentas", abas: [["mercado", "Mercado"], ["trade", "Trade"], ["calculadora", "Calculadora"], ["valuation", "Valuation"]] },
+];
 
 function InviteButton() {
   const [open, setOpen] = useState(false);
@@ -612,7 +624,7 @@ function InviteButton() {
     <div style={{ position: "relative" }}>
       <button
         onClick={gerarConvite}
-        style={{ display: "flex", alignItems: "center", gap: 5, background: "transparent", border: "none", color: PALETTE.gold, cursor: "pointer", fontSize: 12, fontFamily: "'Manrope', sans-serif", padding: 0 }}
+        style={{ display: "flex", alignItems: "center", gap: 5, background: "transparent", border: "none", color: PALETTE.accent, cursor: "pointer", fontSize: 12, fontFamily: "'Hanken Grotesk', sans-serif", padding: 0 }}
       >
         <UserPlus size={13} /> Convidar
       </button>
@@ -652,7 +664,7 @@ function InviteButton() {
                 />
                 <button
                   onClick={copiar}
-                  style={{ display: "flex", alignItems: "center", gap: 4, background: PALETTE.gold, color: "#1A1406", border: "none", borderRadius: 6, padding: "6px 10px", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}
+                  style={{ display: "flex", alignItems: "center", gap: 4, background: PALETTE.accent, color: PALETTE.onAccent, border: "none", borderRadius: 6, padding: "6px 10px", fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}
                 >
                   {copied ? <Check size={12} /> : <Copy size={12} />}
                 </button>

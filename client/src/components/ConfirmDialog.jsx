@@ -10,7 +10,7 @@ export function ConfirmDialog({ title, message, confirmLabel = "Sim", cancelLabe
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(6, 9, 16, 0.6)",
+        background: "rgba(8, 9, 11, 0.6)",
         backdropFilter: "blur(2px)",
         display: "flex",
         alignItems: "center",
@@ -45,7 +45,7 @@ export function ConfirmDialog({ title, message, confirmLabel = "Sim", cancelLabe
               padding: "8px 16px",
               fontSize: 13,
               cursor: "pointer",
-              fontFamily: "'Manrope', sans-serif",
+              fontFamily: "'Hanken Grotesk', sans-serif",
             }}
           >
             {cancelLabel}
@@ -63,7 +63,7 @@ export function ConfirmDialog({ title, message, confirmLabel = "Sim", cancelLabe
               fontSize: 13,
               fontWeight: 600,
               cursor: "pointer",
-              fontFamily: "'Manrope', sans-serif",
+              fontFamily: "'Hanken Grotesk', sans-serif",
             }}
           >
             {confirmLabel}

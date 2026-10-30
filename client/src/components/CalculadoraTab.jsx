@@ -33,7 +33,7 @@ const numInputStyle = {
   padding: "5px 7px",
   color: PALETTE.textPrimary,
   fontSize: 12,
-  fontFamily: "'IBM Plex Mono', monospace",
+  fontFamily: "'Hanken Grotesk', sans-serif",
   textAlign: "right",
 };
 
@@ -44,7 +44,7 @@ const tickerInputStyle = {
   padding: "8px 10px",
   color: PALETTE.textPrimary,
   fontSize: 13,
-  fontFamily: "'IBM Plex Mono', monospace",
+  fontFamily: "'Hanken Grotesk', sans-serif",
   width: 160,
 };
 
@@ -52,12 +52,12 @@ const addBtnStyle = {
   display: "flex",
   alignItems: "center",
   gap: 6,
-  background: PALETTE.gold,
-  color: "#1A1406",
+  background: PALETTE.accent,
+  color: PALETTE.onAccent,
   border: "none",
   borderRadius: 6,
   padding: "8px 14px",
-  fontFamily: "'Manrope', sans-serif",
+  fontFamily: "'Hanken Grotesk', sans-serif",
   fontWeight: 600,
   fontSize: 13,
   cursor: "pointer",
@@ -66,8 +66,8 @@ const addBtnStyle = {
 function thStyle(align) {
   return {
     padding: "9px 10px",
-    fontSize: 10,
-    fontFamily: "'Manrope', sans-serif",
+    fontSize: 11.5,
+    fontFamily: "'Hanken Grotesk', sans-serif",
     fontWeight: 600,
     letterSpacing: "0.04em",
     textTransform: "uppercase",
@@ -91,7 +91,7 @@ function margemBadge(margem) {
         display: "inline-block",
         fontWeight: 700,
         fontSize: 12,
-        color: "#0E1522",
+        color: PALETTE.bg,
         background: positivo ? PALETTE.emerald : PALETTE.crimson,
         borderRadius: 5,
         padding: "2px 8px",
@@ -247,9 +247,9 @@ function CalculadoraAcoes() {
                 <th style={thStyle("right")}>Yield Desej. %</th>
                 <th style={thStyle("right")}>LPA</th>
                 <th style={thStyle("right")}>VPA</th>
-                <th style={{ ...thStyle("right"), color: PALETTE.gold }}>Teto Bazin</th>
+                <th style={{ ...thStyle("right"), color: PALETTE.accent }}>Teto Bazin</th>
                 <th style={thStyle("right")}>Margem Bazin</th>
-                <th style={{ ...thStyle("right"), color: PALETTE.gold }}>Teto Graham</th>
+                <th style={{ ...thStyle("right"), color: PALETTE.accent }}>Teto Graham</th>
                 <th style={thStyle("right")}>Margem Graham</th>
                 <th style={thStyle("center")}></th>
               </tr>
@@ -261,7 +261,7 @@ function CalculadoraAcoes() {
                     <div className="mono" style={{ fontWeight: 700, fontSize: 13 }}>
                       {r.ticker}
                     </div>
-                    <div style={{ fontSize: 10.5, color: PALETTE.textMuted, maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <div style={{ fontSize: 11.5, color: PALETTE.textMuted, maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {r.nome}
                     </div>
                   </td>
@@ -290,11 +290,11 @@ function CalculadoraAcoes() {
                   <td style={tdStyle("right")}>
                     <input style={numInputStyle} type="number" step="0.01" value={r.vpa} onChange={(e) => atualizarCampo(r.ticker, "vpa", Number(e.target.value))} />
                   </td>
-                  <td style={tdStyle("right", { background: "rgba(212,169,79,0.08)" })} className="mono">
+                  <td style={tdStyle("right", { background: "rgba(154, 167, 255,0.08)" })} className="mono">
                     {r.tetoBazin != null ? formatBRL(r.tetoBazin) : "—"}
                   </td>
                   <td style={tdStyle("right")}>{margemBadge(r.margemBazin)}</td>
-                  <td style={tdStyle("right", { background: "rgba(212,169,79,0.08)" })} className="mono">
+                  <td style={tdStyle("right", { background: "rgba(154, 167, 255,0.08)" })} className="mono">
                     {r.tetoGraham != null ? formatBRL(r.tetoGraham) : "não aplicável"}
                   </td>
                   <td style={tdStyle("right")}>{margemBadge(r.margemGraham)}</td>
@@ -427,7 +427,7 @@ function CalculadoraFiis({ ranking }) {
                 <div
                   key={s}
                   onMouseDown={() => adicionar(s)}
-                  style={{ padding: "7px 10px", fontSize: 12.5, fontFamily: "'IBM Plex Mono', monospace", cursor: "pointer" }}
+                  style={{ padding: "7px 10px", fontSize: 12.5, fontFamily: "'Hanken Grotesk', sans-serif", cursor: "pointer" }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = PALETTE.surfaceAlt)}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
@@ -457,7 +457,7 @@ function CalculadoraFiis({ ranking }) {
                 <th style={thStyle("right")}>Dividendo 12M</th>
                 <th style={thStyle("right")}>IPCA+ %</th>
                 <th style={thStyle("right")}>Prêmio %</th>
-                <th style={{ ...thStyle("right"), color: PALETTE.gold }}>Preço Ideal</th>
+                <th style={{ ...thStyle("right"), color: PALETTE.accent }}>Preço Ideal</th>
                 <th style={thStyle("right")}>Margem de Seg.</th>
                 <th style={thStyle("center")}></th>
               </tr>
@@ -480,7 +480,7 @@ function CalculadoraFiis({ ranking }) {
                   <td style={tdStyle("right")}>
                     <input style={numInputStyle} type="number" step="0.1" value={r.premio} onChange={(e) => atualizarCampo(r.ticker, "premio", Number(e.target.value))} />
                   </td>
-                  <td style={tdStyle("right", { background: "rgba(212,169,79,0.08)" })} className="mono">
+                  <td style={tdStyle("right", { background: "rgba(154, 167, 255,0.08)" })} className="mono">
                     {r.precoIdeal != null ? formatBRL(r.precoIdeal) : "—"}
                   </td>
                   <td style={tdStyle("right")}>{margemBadge(r.margem)}</td>
@@ -644,7 +644,7 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
                 <div
                   key={s}
                   onMouseDown={() => adicionar(s)}
-                  style={{ padding: "7px 10px", fontSize: 12.5, fontFamily: "'IBM Plex Mono', monospace", cursor: "pointer" }}
+                  style={{ padding: "7px 10px", fontSize: 12.5, fontFamily: "'Hanken Grotesk', sans-serif", cursor: "pointer" }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = PALETTE.surfaceAlt)}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
@@ -678,7 +678,7 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
                 <th style={thStyle("right")}>Prêmio %</th>
                 <th style={thStyle("right")}>g %</th>
                 <th style={thStyle("right")}>K %</th>
-                <th style={{ ...thStyle("right"), color: PALETTE.gold }}>Preço Justo</th>
+                <th style={{ ...thStyle("right"), color: PALETTE.accent }}>Preço Justo</th>
                 <th style={thStyle("right")}>Desconto</th>
                 <th style={thStyle("center")}></th>
               </tr>
@@ -726,7 +726,7 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
                             </option>
                           ))}
                         </select>
-                        <div style={{ fontSize: 10, color: PALETTE.textMuted, marginTop: 3 }} className="mono">
+                        <div style={{ fontSize: 11.5, color: PALETTE.textMuted, marginTop: 3 }} className="mono">
                           {r.tituloRef}: {r.taxaBase != null ? r.taxaBase.toFixed(2) : "—"}%
                         </div>
                       </div>
@@ -741,7 +741,7 @@ function CalculadoraFiisGordon({ ranking, tesouro }) {
                   <td style={tdStyle("right")} className="mono">
                     {r.k != null ? `${r.k.toFixed(2)}%` : "—"}
                   </td>
-                  <td style={tdStyle("right", { background: "rgba(212,169,79,0.08)" })} className="mono">
+                  <td style={tdStyle("right", { background: "rgba(154, 167, 255,0.08)" })} className="mono">
                     {r.precoJusto != null ? formatBRL(r.precoJusto) : "não aplicável"}
                   </td>
                   <td style={tdStyle("right")}>{margemBadge(r.margem)}</td>

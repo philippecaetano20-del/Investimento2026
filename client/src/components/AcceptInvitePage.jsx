@@ -63,7 +63,7 @@ export function AcceptInvitePage({ token, onAccepted }) {
     return (
       <AuthShell>
         <div style={{ ...authCardStyle, textAlign: "center" }} className="login-fade">
-          <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20, color: PALETTE.textPrimary, marginBottom: 10 }}>
+          <div style={{ fontFamily: "'Hanken Grotesk', sans-serif", fontSize: 20, color: PALETTE.textPrimary, marginBottom: 10 }}>
             Convite inválido
           </div>
           <div style={{ fontSize: 13, color: PALETTE.textMuted }}>{checkError}</div>
@@ -75,7 +75,7 @@ export function AcceptInvitePage({ token, onAccepted }) {
   return (
     <AuthShell>
       <form onSubmit={handleSubmit} className="login-fade" style={{ ...authCardStyle, animationDelay: "0.08s" }}>
-        <div style={{ fontFamily: "'Fraunces', serif", fontSize: 24, fontWeight: 500, color: PALETTE.textPrimary, marginBottom: 6 }}>
+        <div style={{ fontFamily: "'Hanken Grotesk', sans-serif", fontSize: 24, fontWeight: 500, color: PALETTE.textPrimary, marginBottom: 6 }}>
           Criar sua conta
         </div>
         <div style={{ fontSize: 12, color: PALETTE.textMuted, marginBottom: 22 }}>
@@ -130,12 +130,12 @@ export function AcceptInvitePage({ token, onAccepted }) {
             alignItems: "center",
             justifyContent: "center",
             gap: 8,
-            background: PALETTE.gold,
-            color: "#1A1406",
+            background: PALETTE.accent,
+            color: PALETTE.onAccent,
             border: "none",
             borderRadius: 8,
             padding: "12px 16px",
-            fontFamily: "'Manrope', sans-serif",
+            fontFamily: "'Hanken Grotesk', sans-serif",
             fontWeight: 700,
             fontSize: 14,
             cursor: loading ? "default" : "pointer",
