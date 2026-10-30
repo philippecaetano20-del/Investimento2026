@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, LabelList } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, LabelList, Customized } from "recharts";
 import { PALETTE, BAR_COLORS } from "../constants.js";
 import { formatBRL } from "../utils.js";
 
@@ -64,21 +64,31 @@ function useIsNarrowViewport(breakpoint = 560) {
 }
 
 // Coluna 3D no estilo do Excel: frente na cor base, topo mais claro, lateral mais escura
-const BARRA_3D = { frente: "#4F7BE0", topo: "#7E9FEC", lado: "#2F55B0" };
+const BARRA_3D = { frente: "#4F7BE0" };
+// Paleta clássica do Excel, usada quando cada coluna tem sua própria cor (ex.: aportes por ano)
+export const CORES_EXCEL = ["#4472C4", "#ED7D31", "#A5A5A5", "#FFC000", "#5B9BD5", "#70AD47"];
+
+function tom(hex, fator) {
+  const n = parseInt(hex.slice(1), 16);
+  const ajusta = (c) => Math.round(fator >= 0 ? c + (255 - c) * fator : c * (1 + fator));
+  const r = ajusta(n >> 16), g = ajusta((n >> 8) & 255), b = ajusta(n & 255);
+  return "#" + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
+}
 
 function profundidade(width) {
   return Math.max(4, Math.min(12, width * 0.22));
 }
 
-function Barra3D({ x, y, width, height }) {
+function Barra3D({ x, y, width, height, fill }) {
   if (!height || height <= 0) return null;
   const d = profundidade(width);
   const w = width - d;
+  const cor = fill || BARRA_3D.frente;
   return (
     <g>
-      <path d={`M${x + w},${y} L${x + w + d},${y - d} L${x + w + d},${y + height - d} L${x + w},${y + height} Z`} fill={BARRA_3D.lado} />
-      <path d={`M${x},${y} L${x + d},${y - d} L${x + w + d},${y - d} L${x + w},${y} Z`} fill={BARRA_3D.topo} />
-      <rect x={x} y={y} width={w} height={height} fill={BARRA_3D.frente} />
+      <path d={`M${x + w},${y} L${x + w + d},${y - d} L${x + w + d},${y + height - d} L${x + w},${y + height} Z`} fill={tom(cor, -0.32)} />
+      <path d={`M${x},${y} L${x + d},${y - d} L${x + w + d},${y - d} L${x + w},${y} Z`} fill={tom(cor, 0.3)} />
+      <rect x={x} y={y} width={w} height={height} fill={cor} />
     </g>
   );
 }
@@ -96,7 +106,7 @@ function larguraCaixa(texto) {
   return Math.ceil(larguraTexto(texto)) + 14;
 }
 
-function RotuloValor({ x, y, width, value, texto }) {
+function RotuloValor({ x, y, width, value, texto, cor }) {
   if (!value) return null;
   const d = profundidade(width);
   const caixaW = larguraCaixa(texto);
@@ -104,7 +114,7 @@ function RotuloValor({ x, y, width, value, texto }) {
   const by = y - d - 26;
   return (
     <g>
-      <rect x={cx - caixaW / 2} y={by} width={caixaW} height={20} rx={4} fill={PALETTE.surfaceAlt} stroke="rgba(126,159,236,0.55)" />
+      <rect x={cx - caixaW / 2} y={by} width={caixaW} height={20} rx={4} fill={cor ? tom(cor, -0.62) : PALETTE.surfaceAlt} stroke={cor || "rgba(126,159,236,0.55)"} />
       <text x={cx} y={by + 14} textAnchor="middle" fill={PALETTE.textPrimary} fontSize={11.5} fontWeight={600} fontFamily={FONT} style={{ fontVariantNumeric: "tabular-nums" }}>
         {texto}
       </text>
@@ -112,7 +122,46 @@ function RotuloValor({ x, y, width, value, texto }) {
   );
 }
 
-export function ChartCard({ title, data, highlight, tickFormatter, className }) {
+/** Piso 3D sob as colunas, como o "chão" dos gráficos 3D do Excel. */
+function Piso3D({ offset }) {
+  if (!offset) return null;
+  const { left, top, width, height } = offset;
+  const y = top + height;
+  const d = 12;
+  return (
+    <g>
+      <path d={`M${left},${y} L${left + d},${y - d} L${left + width},${y - d} L${left + width - d},${y} Z`} fill={PALETTE.line} />
+      <path d={`M${left},${y} L${left + width - d},${y} L${left + width - d},${y + 4} L${left},${y + 4} Z`} fill={tom(PALETTE.line, -0.35)} />
+    </g>
+  );
+}
+
+/** Tabela de dados abaixo do gráfico, com a cor de cada série, como a "tabela de dados" do Excel. */
+function TabelaLegenda({ data, cores, rotulo }) {
+  return (
+    <table className="tabela-legenda">
+      <thead>
+        <tr>
+          <th scope="col"><span className="sr-only">Série</span></th>
+          <th scope="col">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((d, i) => (
+          <tr key={d.name}>
+            <th scope="row">
+              <span className="tabela-legenda-cor" style={{ background: cores[i % cores.length] }} />
+              {rotulo ? rotulo(d.name) : d.name}
+            </th>
+            <td className="num">{formatBRL(d.value)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+export function ChartCard({ title, data, highlight, tickFormatter, className, cores, tabela, rotuloTabela }) {
   const reducedMotion = usePrefersReducedMotion();
   // No celular as caixas de valor se sobrepõem: mostra só a do período em destaque (as outras ficam no toque)
   const narrow = useIsNarrowViewport();
@@ -126,7 +175,8 @@ export function ChartCard({ title, data, highlight, tickFormatter, className }) 
         <Vazio />
       ) : (
         <ResponsiveContainer width="100%" height={300} onResize={(w) => setLargura(w)}>
-          <BarChart data={data} margin={{ top: 44, right: 8, left: 4, bottom: 0 }} barCategoryGap="18%">
+          <BarChart data={data} margin={{ top: 44, right: 8, left: 4, bottom: 0 }} barCategoryGap={cores ? "6%" : "18%"}>
+            {cores && <Customized component={Piso3D} />}
             <XAxis
               dataKey="name"
               tick={{ fill: PALETTE.textMuted, fontSize: 12, fontFamily: FONT }}
@@ -148,14 +198,17 @@ export function ChartCard({ title, data, highlight, tickFormatter, className }) 
                   const compacto = compactBRL.format(p.value || 0);
                   const opcoes = [completo, semMoeda(completo), compacto, semMoeda(compacto)];
                   const texto = opcoes.find((t) => larguraCaixa(t) <= espacoColuna);
-                  if (!texto || narrow) return destaque ? <RotuloValor {...p} texto={compacto} /> : null;
-                  return <RotuloValor {...p} texto={texto} />;
+                  const cor = cores ? cores[p.index % cores.length] : undefined;
+                  if (!texto || narrow) return destaque ? <RotuloValor {...p} cor={cor} texto={compacto} /> : null;
+                  return <RotuloValor {...p} cor={cor} texto={texto} />;
                 }}
               />
+              {cores && data.map((d, i) => <Cell key={d.name} fill={cores[i % cores.length]} />)}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       )}
+      {data.length > 0 && tabela && <TabelaLegenda data={data} cores={cores || [BARRA_3D.frente]} rotulo={rotuloTabela} />}
     </Panel>
   );
 }

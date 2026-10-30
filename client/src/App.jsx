@@ -5,7 +5,7 @@ import { formatBRL, monthLabel, emptyForm, parseNumBR } from "./utils.js";
 import { api, getToken, clearToken, setUnauthorizedHandler } from "./api.js";
 import { useCountUp } from "./useCountUp.js";
 import { HISTORICO_ANOS_ANTERIORES, TIPO_COLORS } from "./constants.js";
-import { ChartCard, PieChartCard, AtivosList } from "./components/charts.jsx";
+import { ChartCard, PieChartCard, AtivosList, CORES_EXCEL } from "./components/charts.jsx";
 import { MetaAnualCard } from "./components/MetaAnualCard.jsx";
 import { TabButton } from "./components/TabButton.jsx";
 import { LancamentosTab } from "./components/LancamentosTab.jsx";
@@ -393,6 +393,13 @@ function Dashboard({ user, onLogout }) {
         .link-btn { background: none; border: none; padding: 0; margin-top: 16px; color: ${PALETTE.accent}; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; text-underline-offset: 3px; }
         .link-btn:hover { text-decoration: underline; filter: none; }
 
+        .tabela-legenda { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13.5px; }
+        .tabela-legenda th, .tabela-legenda td { border: 1px solid ${PALETTE.line}; padding: 6px 10px; }
+        .tabela-legenda thead th { font-weight: 500; color: ${PALETTE.textMuted}; text-align: center; }
+        .tabela-legenda tbody th { font-weight: 500; text-align: left; white-space: nowrap; }
+        .tabela-legenda td { text-align: center; }
+        .tabela-legenda-cor { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 8px; vertical-align: -1px; }
+        .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
         .classes { display: flex; flex-direction: column; gap: 14px; }
         .classes-rosca { width: 100%; max-width: 220px; margin: 0 auto; }
         .legenda { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
@@ -576,7 +583,14 @@ function Dashboard({ user, onLogout }) {
               />
               <PieChartCard title="Por classe" data={porTipo} colorMap={TIPO_COLORS} />
               <AtivosList title="Por ativo" data={porAtivo} />
-              <ChartCard title="Aportes por ano (R$)" data={porAno} highlight={anoSelecionado} />
+              <ChartCard
+                title="Aportes por ano (R$)"
+                data={porAno}
+                highlight={anoSelecionado}
+                cores={CORES_EXCEL}
+                tabela
+                rotuloTabela={(ano) => `Ano ${ano}`}
+              />
             </div>
           </>
         )}
