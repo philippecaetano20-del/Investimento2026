@@ -36,8 +36,9 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
   const valorPagoNum = parseNumBR(form.valorPago) || 0;
   const calculado = (saque ? -Math.abs(valorPagoNum) : valorPagoNum) * quantidadeEfetiva;
   const isTesouro = form.tipo === "Tesouro Direto";
-  // Lançamentos antigos marcados como reinvestidos mantêm Valor Investido = 0
-  const valorInvestidoExibido = !saque && form.estaReinvestido === "Sim" ? 0 : calculado;
+  const reinvestido = !isRendaFixa && form.estaReinvestido === "Sim";
+  // Saque e compra reinvestida só movem dinheiro entre classes: não entram no total investido
+  const valorInvestidoExibido = saque || reinvestido ? 0 : calculado;
 
   function setTipo(e) {
     const tipo = e.target.value;
@@ -45,6 +46,7 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
       ...form,
       tipo,
       saque: tipo === "Renda Fixa" ? form.saque : "Não",
+      estaReinvestido: tipo === "Renda Fixa" ? "Não" : form.estaReinvestido,
       rentabilidade: tipo === "Tesouro Direto" ? form.rentabilidade : "",
     });
   }
@@ -141,7 +143,7 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
                 </select>
                 {saque && (
                   <div style={{ fontSize: 10.5, color: PALETTE.textMuted, marginTop: 4 }}>
-                    O valor sai da Renda Fixa e volta ao total quando você lançar a compra na outra classe.
+                    O valor sai da Renda Fixa sem alterar o total investido. Na compra da outra classe, marque "Está Reinvestido?" = Sim.
                   </div>
                 )}
               </div>
@@ -150,6 +152,15 @@ export function EntryForm({ form, setForm, onSubmit, onCancel, error, isEdit, at
               <div>
                 <label style={label} htmlFor="entry-quantidade">Quantidade</label>
                 <input id="entry-quantidade" type="text" inputMode="decimal" style={input} value={form.quantidade} onChange={set("quantidade")} placeholder="0" />
+              </div>
+            )}
+            {!isRendaFixa && (
+              <div>
+                <label style={label} htmlFor="entry-reinvestido">Está Reinvestido?</label>
+                <select id="entry-reinvestido" style={input} value={form.estaReinvestido || "Não"} onChange={set("estaReinvestido")}>
+                  <option value="Não">Não</option>
+                  <option value="Sim">Sim</option>
+                </select>
               </div>
             )}
             <div>
