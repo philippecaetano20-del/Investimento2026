@@ -165,12 +165,11 @@ export function ChartCard({ title, data, highlight, tickFormatter, className, co
   const reducedMotion = usePrefersReducedMotion();
   // No celular as caixas de valor se sobrepõem: mostra só a do período em destaque (as outras ficam no toque)
   const narrow = useIsNarrowViewport();
-  const total = data.reduce((s, d) => s + d.value, 0);
   const [largura, setLargura] = useState(0);
   // Espaço horizontal de cada coluna, para escolher o rótulo mais completo que cabe sem sobrepor o vizinho
   const espacoColuna = data.length ? (largura - 12) / data.length - 6 : 0;
   return (
-    <Panel title={title} aside={data.length ? formatBRL(total) : null} className={className}>
+    <Panel title={title} className={className}>
       {data.length === 0 ? (
         <Vazio />
       ) : (
@@ -221,7 +220,7 @@ export function AtivosList({ title, data, className }) {
   const LIMITE = 8;
   const visiveis = verTodos ? positivos : positivos.slice(0, LIMITE);
   return (
-    <Panel title={title} aside={positivos.length ? `${positivos.length} ativos` : null} className={className}>
+    <Panel title={title} className={className}>
       {positivos.length === 0 ? (
         <Vazio />
       ) : (
