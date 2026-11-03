@@ -360,12 +360,10 @@ function Dashboard({ user, onLogout }) {
         .usuario { display: flex; align-items: center; gap: 16px; font-size: 13px; color: ${PALETTE.textMuted}; }
         .total { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; margin-bottom: 28px; }
         .total-valor { font-size: clamp(30px, 6vw, 44px); font-weight: 600; letter-spacing: -0.025em; line-height: 1.05; }
-        .total-rotulo { font-size: 14px; color: ${PALETTE.textMuted}; }
 
         /* Navegação em dois grupos */
         .abas { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 28px; padding-bottom: 16px; margin-bottom: 28px; border-bottom: 1px solid ${PALETTE.line}; }
         .abas-grupo { display: flex; align-items: center; gap: 4px; overflow-x: auto; max-width: 100%; }
-        .abas-grupo-nome { font-size: 12px; font-weight: 500; color: ${PALETTE.textMuted}; margin-right: 8px; flex-shrink: 0; }
 
         /* Painel */
         .painel-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
@@ -418,7 +416,6 @@ function Dashboard({ user, onLogout }) {
           .topo { flex-wrap: wrap; }
           .abas { gap: 12px 20px; }
           .abas-grupo { flex-wrap: wrap; row-gap: 6px; overflow: visible; }
-          .abas-grupo-nome { width: 100%; }
           .tab-btn { padding: 7px 11px !important; }
           .resumo-celula { padding: 14px 14px 16px; }
           .resumo-valor { font-size: 19px; }
@@ -453,16 +450,13 @@ function Dashboard({ user, onLogout }) {
         </header>
 
         <div className="total">
+          <span className="sr-only">Total investido: </span>
           <span className="total-valor num">{formatBRL(totalInvestidoAnimado)}</span>
-          <span className="total-rotulo">
-            investidos no total, em {entries.length} lançamento{entries.length !== 1 ? "s" : ""}
-          </span>
         </div>
 
         <nav className="abas" aria-label="Seções">
           {GRUPOS_ABAS.map((grupo) => (
             <div key={grupo.nome} className="abas-grupo" role="group" aria-label={grupo.nome}>
-              <span className="abas-grupo-nome">{grupo.nome}</span>
               {grupo.abas.map(([id, rotulo]) => (
                 <TabButton key={id} active={activeTab === id} onClick={() => setActiveTab(id)}>
                   {rotulo}
